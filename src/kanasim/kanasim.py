@@ -1,10 +1,12 @@
 import csv
 import os
-from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Union, TypeAlias, Any
+from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Any
+
 
 def load_csv(path: str) -> list[dict[str, str]]:
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
 
 def load_kana_distance_csv(path: str) -> dict[tuple[str, str], float]:
     distance_dict = {}
@@ -12,7 +14,9 @@ def load_kana_distance_csv(path: str) -> dict[tuple[str, str], float]:
     for row in distance_list:
         kana1 = row["kana1"]
         kana2 = row["kana2"]
-        distance = float(row["distance"]) if '.' in row["distance"] else int(row["distance"])
+        distance = (
+            float(row["distance"]) if "." in row["distance"] else int(row["distance"])
+        )
         distance_dict[(kana1, kana2)] = distance
     return distance_dict
 
@@ -27,18 +31,22 @@ def load_phonon_distance_csv(path: str) -> dict[tuple[str, str], float]:
         distance_dict[(phonon1, phonon2)] = distance
     return distance_dict
 
-def create_kana_distance_list(*,
-                             kana2phonon_csv: str, distance_consonants_csv: str, distance_vowels_csv: str, 
-                             vowel_ratio: float,
-                             non_syllabic_penalty: float,
-                             insert_penalty: float,
-                             delete_penalty: float,
-                             replace_penalty: float,
-                             ) -> list[dict]:
+
+def create_kana_distance_list(
+    *,
+    kana2phonon_csv: str,
+    distance_consonants_csv: str,
+    distance_vowels_csv: str,
+    vowel_ratio: float,
+    non_syllabic_penalty: float,
+    insert_penalty: float,
+    delete_penalty: float,
+    replace_penalty: float,
+) -> list[dict]:
     kana2phonon = load_csv(kana2phonon_csv)
     distance_consonants = load_phonon_distance_csv(distance_consonants_csv)
     distance_vowels = load_phonon_distance_csv(distance_vowels_csv)
-    
+
     results = []
     for row1 in kana2phonon:
         for row2 in kana2phonon:
@@ -51,13 +59,19 @@ def create_kana_distance_list(*,
 
             distance_consonant = distance_consonants[(consonant1, consonant2)]
             distance_vowel = distance_vowels[(vowel1, vowel2)]
-            
-            distance = distance_consonant * (1-vowel_ratio) + distance_vowel * vowel_ratio
-            
+
+            distance = (
+                distance_consonant * (1 - vowel_ratio) + distance_vowel * vowel_ratio
+            )
+
             # non-syllabic insert, delete or replace penalty
             if row1["kana"] == "sp" and row2["kana"] == "sp":
                 pass
-            elif row1["kana"] in ["ン", "ッ", "sp"] and row2["kana"] in ["ン", "ッ", "sp"]:
+            elif row1["kana"] in ["ン", "ッ", "sp"] and row2["kana"] in [
+                "ン",
+                "ッ",
+                "sp",
+            ]:
                 distance *= non_syllabic_penalty
             # other insert penalty
             elif row1["kana"] == "sp" and row2["kana"] != "sp":
@@ -68,10 +82,12 @@ def create_kana_distance_list(*,
             # other replace penalty
             else:
                 distance *= replace_penalty
-                
+
             results.append({"kana1": kana1, "kana2": kana2, "distance": distance})
-    
+
     return results
+
+
 # Class to calculate weighted Levenshtein distance
 class WeightedLevenshtein:
     """
@@ -126,8 +142,10 @@ class WeightedLevenshtein:
             list1 = self.preprocess_func(list1)
             list2 = self.preprocess_func(list2)
         return self._calculate(list1, list2)
-    
-    def calculate_batch(self, lists1: List[List[Hashable]], lists2: List[List[Hashable]]) -> List[float]:
+
+    def calculate_batch(
+        self, lists1: List[List[Hashable]], lists2: List[List[Hashable]]
+    ) -> List[float]:
         processed_lists1 = [self.preprocess_func(list1) for list1 in lists1]
         processed_lists2 = [self.preprocess_func(list2) for list2 in lists2]
         results = []
@@ -150,9 +168,10 @@ class WeightedLevenshtein:
             float: The calculated weighted Levenshtein distance.
         """
         return self._calculate_helper(list1, list2, len(list1), len(list2))
-    
 
-    def _calculate_helper(self, list1: List[str], list2: List[str], m: int, n: int) -> float:
+    def _calculate_helper(
+        self, list1: List[str], list2: List[str], m: int, n: int
+    ) -> float:
         """
         A helper function to recursively calculate the weighted Levenshtein distance between two lists of strings.
 
@@ -216,13 +235,18 @@ class WeightedLevenshtein:
         # Memoize the result
         self.memo[(tuple(list1[:m]), tuple(list2[:n]))] = cost
         return cost
+
+
 # Function to split Katakana into moras. However, it deviates from the original definition of moras by considering long vowels as one mora.
+
 
 def extend_long_vowel_moras(text: str) -> List[str]:
     try:
         import jamorasep
     except ImportError:
-        raise ImportError("The jamorasep module is required but not installed. Please install it using 'pip install jamorasep'.")
+        raise ImportError(
+            "The jamorasep module is required but not installed. Please install it using 'pip install jamorasep'."
+        )
 
     parsed_moras = jamorasep.parse(text, output_format="katakana")
     extended_moras = []
@@ -233,24 +257,35 @@ def extend_long_vowel_moras(text: str) -> List[str]:
             extended_moras.append(mora)
     return extended_moras
 
-def create_kana_distance_calculator(*,
-                                    kana2phonon_csv: str = os.path.join(os.path.dirname(__file__), "data/biphone/kana2phonon_bi.csv"),
-                                    distance_consonants_csv: str = os.path.join(os.path.dirname(__file__), "data/biphone/distance_consonants_bi.csv"),
-                                    distance_vowels_csv: str = os.path.join(os.path.dirname(__file__), "data/biphone/distance_vowels_bi.csv"),
-                                    insert_penalty: float = 1.0,
-                                    delete_penalty: float = 1.0,
-                                    replace_penalty: float = 1.0,
-                                    vowel_ratio: float = 0.5,
-                                    non_syllabic_penalty: float = 0.2,
-                                    preprocess_func: Callable[[Any], Iterable[Hashable]] = extend_long_vowel_moras) -> WeightedLevenshtein:
-    distance_list = create_kana_distance_list(kana2phonon_csv=kana2phonon_csv,
-                                             distance_consonants_csv=distance_consonants_csv, 
-                                             distance_vowels_csv=distance_vowels_csv, 
-                                             insert_penalty=insert_penalty, 
-                                             delete_penalty=delete_penalty, 
-                                             replace_penalty=replace_penalty, 
-                                             vowel_ratio=vowel_ratio, 
-                                             non_syllabic_penalty=non_syllabic_penalty)
+
+def create_kana_distance_calculator(
+    *,
+    kana2phonon_csv: str = os.path.join(
+        os.path.dirname(__file__), "data/biphone/kana2phonon_bi.csv"
+    ),
+    distance_consonants_csv: str = os.path.join(
+        os.path.dirname(__file__), "data/biphone/distance_consonants_bi.csv"
+    ),
+    distance_vowels_csv: str = os.path.join(
+        os.path.dirname(__file__), "data/biphone/distance_vowels_bi.csv"
+    ),
+    insert_penalty: float = 1.0,
+    delete_penalty: float = 1.0,
+    replace_penalty: float = 1.0,
+    vowel_ratio: float = 0.5,
+    non_syllabic_penalty: float = 0.2,
+    preprocess_func: Callable[[Any], Iterable[Hashable]] = extend_long_vowel_moras,
+) -> WeightedLevenshtein:
+    distance_list = create_kana_distance_list(
+        kana2phonon_csv=kana2phonon_csv,
+        distance_consonants_csv=distance_consonants_csv,
+        distance_vowels_csv=distance_vowels_csv,
+        insert_penalty=insert_penalty,
+        delete_penalty=delete_penalty,
+        replace_penalty=replace_penalty,
+        vowel_ratio=vowel_ratio,
+        non_syllabic_penalty=non_syllabic_penalty,
+    )
     distance_dict = {}
     for row in distance_list:
         kana1 = row["kana1"]
@@ -260,10 +295,13 @@ def create_kana_distance_calculator(*,
 
     def insert_cost_func(kana: str) -> float:
         return distance_dict[("sp", kana)]
+
     def delete_cost_func(kana: str) -> float:
         return distance_dict[(kana, "sp")]
+
     def replace_cost_func(kana1: str, kana2: str) -> float:
         return distance_dict[(kana1, kana2)]
+
     return WeightedLevenshtein(
         insert_cost_func=insert_cost_func,
         delete_cost_func=delete_cost_func,

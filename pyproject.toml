@@ -1,0 +1,13 @@
+[project]
+name = "kanasim"
+version = "0.0.0"
+description = "A repository for storing phonetic similarity data between Japanese kana characters"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "jamorasep>=0.0.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
