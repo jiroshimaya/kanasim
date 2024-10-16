@@ -1,0 +1,46 @@
+version = 1
+requires-python = ">=3.11"
+
+[[package]]
+name = "jamorasep"
+version = "0.0.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typeguard" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/2a/ef/e79b0c6c6ccb153d9f3d292913dfdb89414c20a1f16ad2b61a817787a7a6/jamorasep-0.0.1.tar.gz", hash = "sha256:a2b13dc23f8edb8195d0d316679ed4b26dabae2772b99962f05af8719eb71e52", size = 14073 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e4/e6/395d7747f4daf7511f976e0c49d2da32b4dc196e018671d609ff887e76c2/jamorasep-0.0.1-py3-none-any.whl", hash = "sha256:e59fcdc3609674a736172f190a6ad38b301364284fe9ee8401e82915c22344bd", size = 8245 },
+]
+
+[[package]]
+name = "kanasim"
+version = "0.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "jamorasep" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "jamorasep", specifier = ">=0.0.1" }]
+
+[[package]]
+name = "typeguard"
+version = "4.3.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8d/e1/3178b3e5369a98239ed7301e3946747048c66f4023163d55918f11b82d4e/typeguard-4.3.0.tar.gz", hash = "sha256:92ee6a0aec9135181eae6067ebd617fd9de8d75d714fb548728a4933b1dea651", size = 73374 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/eb/de/be0ba39ee73760bf33329b7c6f95bc67e96593c69c881671e312538e24bb/typeguard-4.3.0-py3-none-any.whl", hash = "sha256:4d24c5b39a117f8a895b9da7a9b3114f04eb63bade45a4492de49b175b6f7dfa", size = 35385 },
+]
+
+[[package]]
+name = "typing-extensions"
+version = "4.12.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/df/db/f35a00659bc03fec321ba8bce9420de607a1d37f8342eee1863174c69557/typing_extensions-4.12.2.tar.gz", hash = "sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8", size = 85321 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/26/9f/ad63fc0248c5379346306f8668cda6e2e2e9c95e01216d2b8ffd9ff037d0/typing_extensions-4.12.2-py3-none-any.whl", hash = "sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d", size = 37438 },
+]

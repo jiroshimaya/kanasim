@@ -1,5 +1,5 @@
 import csv
-from kanasim import WeightedEditDistance, extend_long_vowel_moras
+from kanasim import WeightedLevenshtein, extend_long_vowel_moras
 
 def load_csv(path: str) -> list[dict[str, str]]:
     with open(path, 'r', encoding='utf-8') as f:
@@ -45,14 +45,14 @@ if __name__ == "__main__":
     def preprocess_func(text: str) -> list[str]:
         return extend_long_vowel_moras(text)
 
-    weighted_edit_distance = WeightedEditDistance(
+    weighted_levenshtein = WeightedLevenshtein(
         insert_cost_func=insert_cost_func,
         delete_cost_func=delete_cost_func,
         replace_cost_func=replace_cost_func,
         preprocess_func=preprocess_func,
     )
     
-    distance = weighted_edit_distance.calculate(word1, word2)
+    distance = weighted_levenshtein.calculate(word1, word2)
     print(distance)
 
     # You can now use word1, word2, and kana_distance_csv in your script

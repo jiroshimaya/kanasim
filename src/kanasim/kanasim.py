@@ -72,11 +72,11 @@ def create_kana_distance_list(*,
             results.append({"kana1": kana1, "kana2": kana2, "distance": distance})
     
     return results
-# Class to calculate weighted edit distance
-class WeightedEditDistance:
+# Class to calculate weighted Levenshtein distance
+class WeightedLevenshtein:
     """
-    A class to calculate the weighted edit distance between two lists of strings.
-    The edit distance is calculated based on the costs of insertion, deletion, and replacement operations.
+    A class to calculate the weighted Levenshtein distance between two lists of strings.
+    The distance is calculated based on the costs of insertion, deletion, and replacement operations.
     Custom cost functions and preprocessing functions can be provided to modify the behavior of the distance calculation.
 
     Attributes:
@@ -101,7 +101,7 @@ class WeightedEditDistance:
         preprocess_func: Optional[Callable[[Any], Iterable[Hashable]]] = None,
     ):
         """
-        Initializes the WeightedEditDistance class with the given costs and custom functions.
+        Initializes the WeightedLevenshtein class with the given costs and custom functions.
 
         Args:
             insert_cost (float): The default cost of an insertion operation.
@@ -140,21 +140,21 @@ class WeightedEditDistance:
 
     def _calculate(self, list1: List[Hashable], list2: List[Hashable]) -> float:
         """
-        Calculates the weighted edit distance between two lists of strings.
+        Calculates the weighted Levenshtein distance between two lists of strings.
 
         Args:
             list1 (List[str]): The first list of strings.
             list2 (List[str]): The second list of strings.
 
         Returns:
-            float: The calculated weighted edit distance.
+            float: The calculated weighted Levenshtein distance.
         """
         return self._calculate_helper(list1, list2, len(list1), len(list2))
     
 
     def _calculate_helper(self, list1: List[str], list2: List[str], m: int, n: int) -> float:
         """
-        A helper function to recursively calculate the weighted edit distance between two lists of strings.
+        A helper function to recursively calculate the weighted Levenshtein distance between two lists of strings.
 
         Args:
             list1 (List[str]): The first list of strings.
@@ -163,7 +163,7 @@ class WeightedEditDistance:
             n (int): The length of the second list.
 
         Returns:
-            float: The calculated weighted edit distance.
+            float: The calculated weighted Levenshtein distance.
         """
         # Check for memoized result
         if (tuple(list1[:m]), tuple(list2[:n])) in self.memo:
@@ -242,7 +242,7 @@ def create_kana_distance_calculator(*,
                                     replace_penalty: float = 1.0,
                                     vowel_ratio: float = 0.5,
                                     non_syllabic_penalty: float = 0.2,
-                                    preprocess_func: Callable[[Any], Iterable[Hashable]] = extend_long_vowel_moras) -> WeightedEditDistance:
+                                    preprocess_func: Callable[[Any], Iterable[Hashable]] = extend_long_vowel_moras) -> WeightedLevenshtein:
     distance_list = create_kana_distance_list(kana2phonon_csv=kana2phonon_csv,
                                              distance_consonants_csv=distance_consonants_csv, 
                                              distance_vowels_csv=distance_vowels_csv, 
@@ -264,10 +264,9 @@ def create_kana_distance_calculator(*,
         return distance_dict[(kana, "sp")]
     def replace_cost_func(kana1: str, kana2: str) -> float:
         return distance_dict[(kana1, kana2)]
-    return WeightedEditDistance(
+    return WeightedLevenshtein(
         insert_cost_func=insert_cost_func,
         delete_cost_func=delete_cost_func,
         replace_cost_func=replace_cost_func,
         preprocess_func=preprocess_func,
     )
-    
