@@ -29,6 +29,8 @@ if __name__ == "__main__":
         parser.add_argument('-w', '--wordlist', type=str, required=False, default=default_wordlist, help='Path to the word list file')
         parser.add_argument('-n', '--topn', type=int, default=10, help='Number of top similar words to return')
         parser.add_argument('-vr', '--vowel_ratio', type=float, required=False, default=0.5, help='Ratio for vowels')
+        parser.add_argument('-cr', '--consonant_ratio', type=float, required=False, default=0.5, help='Ratio for consonants')
+        parser.add_argument('-sr', '--surface_ratio', type=float, required=False, default=0.0, help='Ratio for surface')
         return parser.parse_args()
 
     args = parse_arguments()
@@ -36,20 +38,23 @@ if __name__ == "__main__":
     wordlist_path = args.wordlist
 
     wordlist = load_wordlist(wordlist_path)
-    pronunciations = [extend_long_vowel_moras(pronunciation) for pronunciation in wordlist]
+    surface_pronunciations = [extend_long_vowel_moras(pronunciation) for pronunciation in wordlist]
     consonant_pronunciations = []
     vowel_pronunciations = []
-    for pronunciation in pronunciations:
-        consonants, vowels = convert_to_vowels_and_consonants(pronunciation)
+    for surface_pronunciation in surface_pronunciations:
+        consonants, vowels = convert_to_vowels_and_consonants(surface_pronunciation)
         consonant_pronunciations.append(consonants)
         vowel_pronunciations.append(vowels)
     
+    surface_word = extend_long_vowel_moras(word)
+    surface_distances = [ed.eval(surface_word, pronunciation) for pronunciation in surface_pronunciations]
     consonant_word, vowel_word = convert_to_vowels_and_consonants(word)
     consonant_distances = [ed.eval(consonant_word, pronunciation) for pronunciation in consonant_pronunciations]
     vowel_distances = [ed.eval(vowel_word, pronunciation) for pronunciation in vowel_pronunciations]
     distances = []
-    for consonant_distance, vowel_distance in zip(consonant_distances, vowel_distances):
-        distances.append(consonant_distance * (1 - args.vowel_ratio) + vowel_distance * args.vowel_ratio)
+    for surface_distance, consonant_distance, vowel_distance in zip(surface_distances, consonant_distances, vowel_distances):
+        distance = surface_distance * args.surface_ratio + consonant_distance * args.consonant_ratio + vowel_distance * args.vowel_ratio
+        distances.append(distance)
     wordlist_with_distance = [(row, distances[i]) for i, row in enumerate(wordlist)]
     sorted_wordlist = sorted(wordlist_with_distance, key=lambda x: x[1])    
     for word, distance in sorted_wordlist[:args.topn]:

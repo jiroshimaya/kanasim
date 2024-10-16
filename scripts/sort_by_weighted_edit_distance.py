@@ -34,9 +34,8 @@ if __name__ == "__main__":
     kana2phonon_csv = args.kana2phonon
     distance_vowels_csv = args.distance_vowels
     distance_consonants_csv = args.distance_consonants
-    
 
-    weighted_edit_distance = create_kana_distance_calculator(
+    weighted_levenshtein = create_kana_distance_calculator(
         kana2phonon_csv=kana2phonon_csv,
         distance_vowels_csv=distance_vowels_csv,
         distance_consonants_csv=distance_consonants_csv,
@@ -47,9 +46,8 @@ if __name__ == "__main__":
         non_syllabic_penalty=args.non_syllabic_penalty
     )
     
-    
     wordlist = load_wordlist(wordlist_path)
-    distances = weighted_edit_distance.calculate_batch([word], wordlist)[0]
+    distances = weighted_levenshtein.calculate_batch([word], wordlist)[0]
     wordlist_with_distance = [(row, distances[i]) for i, row in enumerate(wordlist)]
     sorted_wordlist = sorted(wordlist_with_distance, key=lambda x: x[1])    
     for word, distance in sorted_wordlist[:args.topn]:
