@@ -110,6 +110,13 @@ if __name__ == "__main__":
             default=10,
             help="Number of top similar words to return",
         )
+        parser.add_argument(
+            "-dt",
+            "--distance_type",
+            type=str,
+            default="levenshtein",
+            help="Distance type (levenshtein or hamming)",
+        )
         return parser.parse_args()
 
     args = parse_arguments()
@@ -128,6 +135,7 @@ if __name__ == "__main__":
         replace_penalty=args.replace_penalty,
         vowel_ratio=args.vowel_ratio,
         non_syllabic_penalty=args.non_syllabic_penalty,
+        distance_type=args.distance_type,
     )
 
     wordlist = load_wordlist(wordlist_path)

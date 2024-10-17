@@ -1,6 +1,7 @@
 import csv
 import os
-from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Any
+from typing import Callable
+#from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Any
 
 
 def load_csv(path: str) -> list[dict[str, str]]:
@@ -43,6 +44,8 @@ def create_kana_distance_list(
     delete_penalty: float,
     replace_penalty: float,
 ) -> list[dict]:
+    if not (0 <= vowel_ratio <= 1):
+        raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
     kana2phonon = load_csv(kana2phonon_csv)
     distance_consonants = load_phonon_distance_csv(distance_consonants_csv)
     distance_vowels = load_phonon_distance_csv(distance_vowels_csv)
@@ -111,10 +114,10 @@ class WeightedLevenshtein:
         insert_cost: float = 1.0,
         delete_cost: float = 1.0,
         replace_cost: float = 1.0,
-        insert_cost_func: Optional[Callable[[Hashable], float]] = None,
-        delete_cost_func: Optional[Callable[[Hashable], float]] = None,
-        replace_cost_func: Optional[Callable[[Hashable, Hashable], float]] = None,
-        preprocess_func: Optional[Callable[[Any], Iterable[Hashable]]] = None,
+        insert_cost_func: Callable[[str], float] | None = None,
+        delete_cost_func: Callable[[str], float] | None = None,
+        replace_cost_func: Callable[[str, str], float] | None = None,
+        preprocess_func: Callable[[str], list[str]] | None = None,
     ):
         """
         Initializes the WeightedLevenshtein class with the given costs and custom functions.
@@ -135,112 +138,128 @@ class WeightedLevenshtein:
         self.delete_cost_func = delete_cost_func
         self.replace_cost_func = replace_cost_func
         self.preprocess_func = preprocess_func
-        self.memo: Dict[Tuple[Tuple[Hashable, ...], Tuple[Hashable, ...]], float] = {}
+        self.memo: dict[tuple[str, str], float] = {}
 
-    def calculate(self, list1: List[Hashable], list2: List[Hashable]) -> float:
+    def calculate(self, word1: str, word2: str) -> float:
         if self.preprocess_func:
-            list1 = self.preprocess_func(list1)
-            list2 = self.preprocess_func(list2)
-        return self._calculate(list1, list2)
+            word1 = self.preprocess_func(word1)
+            word2 = self.preprocess_func(word2)
+        return self._calculate(word1, word2)
 
     def calculate_batch(
-        self, lists1: List[List[Hashable]], lists2: List[List[Hashable]]
-    ) -> List[float]:
-        processed_lists1 = [self.preprocess_func(list1) for list1 in lists1]
-        processed_lists2 = [self.preprocess_func(list2) for list2 in lists2]
+        self, words1: list[str], words2: list[str]
+    ) -> list[float]:
+        if self.preprocess_func:
+            words1 = [self.preprocess_func(word1) for word1 in words1]
+            words2 = [self.preprocess_func(word2) for word2 in words2]
         results = []
-        for processed_list1 in processed_lists1:
+        for word1 in words1:
             result = []
-            for processed_list2 in processed_lists2:
-                result.append(self._calculate(processed_list1, processed_list2))
+            for word2 in words2:
+                result.append(self._calculate(word1, word2))
             results.append(result)
         return results
 
-    def _calculate(self, list1: List[Hashable], list2: List[Hashable]) -> float:
+    def get_topn(self, word: str, wordlist: list[str], n: int = 10) -> list[tuple[str, float]]:
+        """
+        Get the top n similar lists from the given list.
+
+        Args:
+            word (str): The word to compare with.
+            wordlist (list[str]): The list of words to compare.
+            n (int): The number of similar words to get.
+
+        Returns:
+            List[Tuple[Hashable, float]]: The top n similar lists and their distances.
+        """
+        distances = self.calculate_batch([word], wordlist)[0]
+        return sorted(zip(wordlist, distances), key=lambda x: x[1])[:n]
+
+    def _calculate(self, word1: str, word2: str) -> float:
         """
         Calculates the weighted Levenshtein distance between two lists of strings.
 
         Args:
-            list1 (List[str]): The first list of strings.
-            list2 (List[str]): The second list of strings.
+            word1 (str): The first word.
+            word2 (str): The second word.
 
         Returns:
             float: The calculated weighted Levenshtein distance.
         """
-        return self._calculate_helper(list1, list2, len(list1), len(list2))
+        return self._calculate_helper(word1, word2, len(word1), len(word2))
 
     def _calculate_helper(
-        self, list1: List[str], list2: List[str], m: int, n: int
+        self, word1: str, word2: str, m: int, n: int
     ) -> float:
         """
         A helper function to recursively calculate the weighted Levenshtein distance between two lists of strings.
 
         Args:
-            list1 (List[str]): The first list of strings.
-            list2 (List[str]): The second list of strings.
-            m (int): The length of the first list.
-            n (int): The length of the second list.
+            word1 (str): The first word.
+            word2 (str): The second word.
+            m (int): The length of the first word.
+            n (int): The length of the second word.
 
         Returns:
             float: The calculated weighted Levenshtein distance.
         """
         # Check for memoized result
-        if (tuple(list1[:m]), tuple(list2[:n])) in self.memo:
-            return self.memo[(tuple(list1[:m]), tuple(list2[:n]))]
+        if (tuple(word1[:m]), tuple(word2[:n])) in self.memo:
+            return self.memo[(tuple(word1[:m]), tuple(word2[:n]))]
 
         # Base case
         if m == 0:
             cost = 0.0
             for i in range(n):
                 cost += (
-                    self.insert_cost_func(list2[i])
+                    self.insert_cost_func(word2[i])
                     if self.insert_cost_func
                     else self.insert_cost
                 )
-            self.memo[(tuple(list1[:m]), tuple(list2[:n]))] = cost
+            self.memo[(tuple(word1[:m]), tuple(word2[:n]))] = cost
             return cost
         if n == 0:
             cost = 0.0
             for i in range(m):
                 cost += (
-                    self.delete_cost_func(list1[i])
+                    self.delete_cost_func(word1[i])
                     if self.delete_cost_func
                     else self.delete_cost
                 )
-            self.memo[(tuple(list1[:m]), tuple(list2[:n]))] = cost
+            self.memo[(tuple(word1[:m]), tuple(word2[:n]))] = cost
             return cost
 
         # Calculate the cost of replace, delete, and insert
         replace_cost = (
-            self.replace_cost_func(list1[m - 1], list2[n - 1])
+            self.replace_cost_func(word1[m - 1], word2[n - 1])
             if self.replace_cost_func
             else self.replace_cost
         )
         delete_cost = (
-            self.delete_cost_func(list1[m - 1])
+            self.delete_cost_func(word1[m - 1])
             if self.delete_cost_func
             else self.delete_cost
         )
         insert_cost = (
-            self.insert_cost_func(list2[n - 1])
+            self.insert_cost_func(word2[n - 1])
             if self.insert_cost_func
             else self.insert_cost
         )
 
-        replace = replace_cost + self._calculate_helper(list1, list2, m - 1, n - 1)
-        delete = delete_cost + self._calculate_helper(list1, list2, m - 1, n)
-        insert = insert_cost + self._calculate_helper(list1, list2, m, n - 1)
+        replace = replace_cost + self._calculate_helper(word1, word2, m - 1, n - 1)
+        delete = delete_cost + self._calculate_helper(word1, word2, m - 1, n)
+        insert = insert_cost + self._calculate_helper(word1, word2, m, n - 1)
         cost = min(replace, delete, insert)
 
         # Memoize the result
-        self.memo[(tuple(list1[:m]), tuple(list2[:n]))] = cost
+        self.memo[(tuple(word1[:m]), tuple(word2[:n]))] = cost
         return cost
 
 
 # Function to split Katakana into moras. However, it deviates from the original definition of moras by considering long vowels as one mora.
 
 
-def extend_long_vowel_moras(text: str) -> List[str]:
+def extend_long_vowel_moras(text: str) -> list[str]:
     try:
         import jamorasep
     except ImportError:
@@ -256,6 +275,121 @@ def extend_long_vowel_moras(text: str) -> List[str]:
         else:
             extended_moras.append(mora)
     return extended_moras
+
+
+# Class to calculate weighted Hamming distance
+class WeightedHamming:
+    """
+    A class to calculate the weighted Hamming distance between two strings.
+    The distance is calculated based on the costs of replacement operations.
+    Custom cost functions and preprocessing functions can be provided to modify the behavior of the distance calculation.
+
+    Attributes:
+        replace_cost (float): The default cost of a replacement operation.
+        replace_cost_func (Optional[Callable[[str, str], float]]): A custom function to calculate the cost of a replacement operation.
+        preprocess_func (Optional[Callable[[str], List[str]]]): A custom function to preprocess the input strings before calculating the distance.
+        memo (Dict[Tuple[Tuple[str, ...], Tuple[str, ...]], float]): A dictionary to store memoized results of distance calculations.
+    """
+
+    def __init__(
+        self,
+        replace_cost: float = 1.0,
+        replace_cost_func: Callable[[str, str], float] | None = None,
+        preprocess_func: Callable[[str], list[str]] | None = None,
+    ):
+        """
+        Initializes the WeightedHamming class with the given costs and custom functions.
+
+        Args:
+            replace_cost (float): The default cost of a replacement operation.
+            replace_cost_func (Optional[Callable[[str, str], float]]): A custom function to calculate the cost of a replacement operation.
+            preprocess_func (Optional[Callable[[str], List[str]]]): A custom function to preprocess the input strings before calculating the distance.
+        """
+        self.replace_cost = replace_cost
+        self.replace_cost_func = replace_cost_func
+        self.preprocess_func = preprocess_func
+        self.memo: dict[tuple[str, str], float] = {}
+
+    def calculate(self, word1: str, word2: str) -> float:
+        if self.preprocess_func:
+            word1 = self.preprocess_func(word1)
+            word2 = self.preprocess_func(word2)
+        return self._calculate(word1, word2)
+
+    def calculate_batch(
+        self, words1: list[str], words2: list[str]
+        
+    ) -> list[float]:
+        if self.preprocess_func:
+            words1 = [self.preprocess_func(word1) for word1 in words1]
+            words2 = [self.preprocess_func(word2) for word2 in words2]
+        results = []
+        for word1 in words1:
+            result = []
+            for word2 in words2:
+                result.append(self._calculate(word1, word2))
+            results.append(result)
+        return results
+
+    def get_topn(self, word: str, wordlist: list[str], n: int = 10) -> list[tuple[str, float]]:
+        """
+        Get the top n similar words from the given list based on weighted Hamming distance.
+
+        Args:
+            word (str): The word to compare with.
+            wordlist (list[str]): The list of words to compare.
+            n (int): The number of similar words to get.
+
+        Returns:
+            List[Tuple[str, float]]: The top n similar words and their distances.
+        """
+        distances = self.calculate_batch([word], wordlist)[0]
+        return sorted(zip(wordlist, distances), key=lambda x: x[1])[:n]
+
+    def _calculate(self, word1: str, word2: str) -> float:
+        """
+        Calculates the weighted Hamming distance between two strings.
+
+        Args:
+            word1 (str): The first word.
+            word2 (str): The second word.
+
+        Returns:
+            float: The calculated weighted Hamming distance.
+        """
+        if len(word1) != len(word2):
+            return float('inf')
+        return self._calculate_helper(word1, word2, len(word1))
+
+    def _calculate_helper(
+        self, word1: str, word2: str, length: int
+    ) -> float:
+        """
+        A helper function to calculate the weighted Hamming distance between two strings.
+
+        Args:
+            word1 (str): The first word.
+            word2 (str): The second word.
+            length (int): The length of the words.
+
+        Returns:
+            float: The calculated weighted Hamming distance.
+        """
+        # Check for memoized result
+        if (tuple(word1), tuple(word2)) in self.memo:
+            return self.memo[(tuple(word1), tuple(word2))]
+
+        cost = 0.0
+        for i in range(length):
+            if self.replace_cost_func:
+                cost += self.replace_cost_func(word1[i], word2[i])
+            else:
+                if word1[i] != word2[i]:
+                    cost += self.replace_cost
+
+        # Memoize the result
+        self.memo[(tuple(word1), tuple(word2))] = cost
+        return cost
 
 
 def create_kana_distance_calculator(
@@ -274,8 +408,9 @@ def create_kana_distance_calculator(
     replace_penalty: float = 1.0,
     vowel_ratio: float = 0.5,
     non_syllabic_penalty: float = 0.2,
-    preprocess_func: Callable[[Any], Iterable[Hashable]] = extend_long_vowel_moras,
-) -> WeightedLevenshtein:
+    preprocess_func: Callable[[str], list[str]] | None = extend_long_vowel_moras,
+    distance_type: str = "levenshtein"
+) -> WeightedLevenshtein | WeightedHamming:
     distance_list = create_kana_distance_list(
         kana2phonon_csv=kana2phonon_csv,
         distance_consonants_csv=distance_consonants_csv,
@@ -302,9 +437,17 @@ def create_kana_distance_calculator(
     def replace_cost_func(kana1: str, kana2: str) -> float:
         return distance_dict[(kana1, kana2)]
 
-    return WeightedLevenshtein(
-        insert_cost_func=insert_cost_func,
+    if distance_type == "levenshtein":
+        return WeightedLevenshtein(
+            insert_cost_func=insert_cost_func,
         delete_cost_func=delete_cost_func,
         replace_cost_func=replace_cost_func,
-        preprocess_func=preprocess_func,
-    )
+            preprocess_func=preprocess_func,
+        )
+    elif distance_type == "hamming":
+        return WeightedHamming(
+            replace_cost_func=replace_cost_func,
+            preprocess_func=preprocess_func,
+        )
+    else:
+        raise ValueError(f"Invalid distance type: {distance_type}")
