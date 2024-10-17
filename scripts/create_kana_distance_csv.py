@@ -6,8 +6,8 @@ from kanasim import create_kana_distance_list
 if __name__ == "__main__":
     import os
 
-    default_kana2phonon_csv = os.path.join(
-        os.path.dirname(__file__), "../src/kanasim/data/biphone/kana2phonon_bi.csv"
+    default_kana2phonome_csv = os.path.join(
+        os.path.dirname(__file__), "../src/kanasim/data/biphone/kana2phonome_bi.csv"
     )
     default_distance_consonants_csv = os.path.join(
         os.path.dirname(__file__),
@@ -20,15 +20,15 @@ if __name__ == "__main__":
 
     def parse_arguments():
         parser = argparse.ArgumentParser(
-            description="Process paths for kana2phonon, distance_consonants, and distance_vowels CSV files."
+            description="Process paths for kana2phonome, distance_consonants, and distance_vowels CSV files."
         )
         parser.add_argument(
             "-k",
-            "--kana2phonon",
+            "--kana2phonome",
             type=str,
             required=False,
-            default=default_kana2phonon_csv,
-            help="Path to the kana2phonon CSV file",
+            default=default_kana2phonome_csv,
+            help="Path to the kana2phonome CSV file",
         )
         parser.add_argument(
             "-c",
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 
     args = parse_arguments()
     results = create_kana_distance_list(
-        kana2phonon_csv=args.kana2phonon,
+        kana2phonome_csv=args.kana2phonome,
         distance_consonants_csv=args.distance_consonants,
         distance_vowels_csv=args.distance_vowels,
         insert_penalty=args.insert_penalty,

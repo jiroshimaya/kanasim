@@ -1,12 +1,14 @@
 # kanasim
-##### [English](./README.md) | 日本語
+
 このリポジトリは、空耳歌詞の作詞支援アプリ「[Soramimic](https://soramimic.com)」で使用されている、日本語のカナの音韻類似度データと、そのデータを用いて単語間の類似度を計算するサンプルプログラムを提供します。  
-空耳に限らず、ダジャレやラップの自動生成など、音韻の類似度を定量的に評価することが重要なプロジェクトでの利用が期待されます。
+空耳に限らず、ダジャレやラップの自動生成など、音韻の類似度を定量的に評価することが重要なアプリケーションでの活用が期待されます。
+
+[English](./README.md) | 日本語
 
 ## 音韻類似度データ
 音声認識ソフトウェア[julius](https://github.com/julius-speech/julius)の音響モデルを使用して計算された、子音間および母音間の距離データです。以下に保存されています。
 
-- [カナ-音素-類似度対応表](src/kanasim/data/biphone/kana_to_phonon_distance.csv)
+- [カナ-音素-類似度対応表](src/kanasim/data/biphone/kana_to_phonome_distance.csv)
 
 csv形式で列名は以下です。
 
@@ -25,7 +27,7 @@ csv形式で列名は以下です。
 ```Python
 import pandas as pd
 # カナ-音素-類似度対応表を読み込む
-kana_df = pd.read_csv("src/kanasim/data/biphone/kana_to_phonon_distance.csv")
+kana_df = pd.read_csv("src/kanasim/data/biphone/kana_to_phonome_distance.csv")
 # カナ-音素-類似度対応表を辞書に変換する
 kana_dict = {}
 for _, row in kana_df.iterrows():
@@ -182,26 +184,26 @@ vowel_ratio=0.8
 
 
 ## その他の音韻類似度関連ファイル
-[カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonon_distance.csv)以外に、3つのファイルがあります。これらのファイルは、カナ-音素-類似度対応表に統合されているため、通常はこれらを直接参照する必要はありません。
+[カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonome_distance.csv)以外に、3つのファイルがあります。これらのファイルは、カナ-音素-類似度対応表に統合されているため、通常はこれらを直接参照する必要はありません。
 
 - [子音距離](src/kanasim/data/biphone/distance_consonants_bi.csv)
 - [母音距離](src/kanasim/data/biphone/distance_vowels_bi.csv)
-- [カナ-音素対応表](src/kanasim/data/biphone/kana2phonon_bi.csv)
+- [カナ-音素対応表](src/kanasim/data/biphone/kana2phonome_bi.csv)
 
 ### 子音・母音距離
 CSV形式で、以下の列名があります。
 
-- phonon1: 1つ目の音素
-- phonon2: 2つ目の音素
-- distance: phonon1とphonon2の距離
+- phonome1: 1つ目の音素
+- phonome2: 2つ目の音素
+- distance: phonome1とphonome2の距離
 
-phononは無音（sp）、促音（q）、撥音（N）を除き、隣接音素とのバイフォン（biphone）形式で記述されています（[参考](https://ftp.jaist.ac.jp/pub/osdn.net/julius/47534/Juliusbook-4.1.5-ja.pdf#page=37)）。
+phonomeは無音（sp）、促音（q）、撥音（N）を除き、隣接音素とのバイフォン（biphone）形式で記述されています（[参考](https://ftp.jaist.ac.jp/pub/osdn.net/julius/47534/Juliusbook-4.1.5-ja.pdf#page=37)）。
 子音の場合、直後の母音とのバイフォンです。直後の母音は`+`で区切られます。
 例えば、`b+a`は、aという母音の直前のbという子音を意味します。
 母音の場合、直前の子音とのバイフォンです。直前の子音は`-`で区切られます。
 例えば、`b-a`はbの直後のaという母音を意味します。
 
-distanceが小さいほど、類似度が高いことを示します。「距離」と呼んでいますが、phonon1と2を入れ替えると値が異なるため、厳密な距離の定義は満たしません。また、同じ音素の「距離」が0にはなりません。
+distanceが小さいほど、類似度が高いことを示します。「距離」と呼んでいますが、phonome1と2を入れ替えると値が異なるため、厳密な距離の定義は満たしません。また、同じ音素の「距離」が0にはなりません。
 
 ### カナ-音素対応表
 CSV形式で、以下の列名があります。
@@ -228,7 +230,7 @@ HMM同士の「距離」は、ある音素のHMMの出力が別の音素のHMM�
 ### 視覚化
 上記の方法で算出した音素の位置関係を、2次元尺度法によりマッピングした図を示します。バイフォンだと要素が多すぎるため、モノフォンで計算したものに基づいています。口蓋音、有声音、無声音、母音など、同じジャンルに属する音素がなんとなく近くに存在していることがわかります。
 
-![音素の位置関係](docs/pictures/phonon_distance_2d.png)
+![音素の位置関係](docs/pictures/phonome_distance_2d.png)
 
 
 ### ベースラインとの比較

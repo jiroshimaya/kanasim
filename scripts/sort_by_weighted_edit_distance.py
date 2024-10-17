@@ -10,8 +10,8 @@ if __name__ == "__main__":
     import argparse
     import os
 
-    default_kana2phonon_csv = os.path.join(
-        os.path.dirname(__file__), "../src/kanasim/data/biphone/kana2phonon_bi.csv"
+    default_kana2phonome_csv = os.path.join(
+        os.path.dirname(__file__), "../src/kanasim/data/biphone/kana2phonome_bi.csv"
     )
     default_distance_vowels_csv = os.path.join(
         os.path.dirname(__file__), "../src/kanasim/data/biphone/distance_vowels_bi.csv"
@@ -41,11 +41,11 @@ if __name__ == "__main__":
         )
         parser.add_argument(
             "-k",
-            "--kana2phonon",
+            "--kana2phonome",
             type=str,
             required=False,
-            default=default_kana2phonon_csv,
-            help="Path to the kana2phonon CSV file",
+            default=default_kana2phonome_csv,
+            help="Path to the kana2phonome CSV file",
         )
         parser.add_argument(
             "-v",
@@ -122,12 +122,12 @@ if __name__ == "__main__":
     args = parse_arguments()
     word = args.word
     wordlist_path = args.wordlist
-    kana2phonon_csv = args.kana2phonon
+    kana2phonome_csv = args.kana2phonome
     distance_vowels_csv = args.distance_vowels
     distance_consonants_csv = args.distance_consonants
 
     weighted_levenshtein = create_kana_distance_calculator(
-        kana2phonon_csv=kana2phonon_csv,
+        kana2phonome_csv=kana2phonome_csv,
         distance_vowels_csv=distance_vowels_csv,
         distance_consonants_csv=distance_consonants_csv,
         insert_penalty=args.insert_penalty,
