@@ -1,6 +1,6 @@
 # kanasim
 
-This repository provides Japanese kana phonetic similarity data and a sample code to calculate word similarity using that data, which is used in the parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in applications where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
+This repository provides Japanese kana phonetic similarity data and a sample code to calculate word similarity using that data, which is used in the homophonic parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in applications where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
 
 #### English | [日本語](./README.ja.md)
 
