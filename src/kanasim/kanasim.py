@@ -43,16 +43,25 @@ def create_kana_distance_list(
     insert_penalty: float,
     delete_penalty: float,
     replace_penalty: float,
-    use_same_phonome_offset: bool
+    same_phonome_offset: bool,
+    consonant_binary: bool,
+    vowel_binary: bool
 ) -> list[dict]:
     if not (0 <= vowel_ratio <= 1):
         raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
     kana2phonome = load_csv(kana2phonome_csv)
     distance_consonants_raw = load_phonome_distance_csv(distance_consonants_csv)
     distance_vowels_raw = load_phonome_distance_csv(distance_vowels_csv)
+    
+    
+    if consonant_binary:
+        distance_consonants_raw = {phoneme: 0 if phoneme[0].split("+")[0] == phoneme[1].split("+")[0] else 1 for phoneme in distance_consonants_raw}
+    if vowel_binary:
+        distance_vowels_raw = {phoneme: 0 if phoneme[0].split("-")[-1] == phoneme[1].split("-")[-1] else 1 for phoneme in distance_vowels_raw}
+    
     distance_consonants = {}
     distance_vowels = {}
-    if use_same_phonome_offset:
+    if same_phonome_offset:
         for phoneme1, phoneme2 in distance_consonants_raw.keys():
             offset = distance_consonants_raw[(phoneme1, phoneme1)]
             distance_consonants[(phoneme1, phoneme2)] = max(0, distance_consonants_raw[(phoneme1, phoneme2)] - offset)
@@ -62,6 +71,7 @@ def create_kana_distance_list(
     else:
         distance_consonants = distance_consonants_raw
         distance_vowels = distance_vowels_raw
+
 
     results = []
     for row1 in kana2phonome:
@@ -423,7 +433,9 @@ def create_kana_distance_calculator(
     non_syllabic_penalty: float = 0.2,
     preprocess_func: Callable[[str], list[str]] | None = extend_long_vowel_moras,
     distance_type: str = "levenshtein",
-    use_same_phonome_offset: bool = True,
+    same_phonome_offset: bool = True,
+    consonant_binary: bool = False,
+    vowel_binary: bool = False,
 ) -> WeightedLevenshtein | WeightedHamming:
     distance_list = create_kana_distance_list(
         kana2phonome_csv=kana2phonome_csv,
@@ -434,7 +446,9 @@ def create_kana_distance_calculator(
         replace_penalty=replace_penalty,
         vowel_ratio=vowel_ratio,
         non_syllabic_penalty=non_syllabic_penalty,
-        use_same_phonome_offset=use_same_phonome_offset,
+        same_phonome_offset=same_phonome_offset,
+        consonant_binary=consonant_binary,
+        vowel_binary=vowel_binary,
     )
     distance_dict = {}
     for row in distance_list:

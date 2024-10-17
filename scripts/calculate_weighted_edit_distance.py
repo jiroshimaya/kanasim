@@ -100,8 +100,18 @@ if __name__ == "__main__":
             action="store_true",
             help="Disable using the same phoneme distance as the offset for consonants and vowels",
         )
-        return parser.parse_args()
-
+        parser.add_argument(
+            "-cb",
+            "--consonant_binary",
+            action="store_true",
+            help="Use binary distance for consonants",
+        )
+        parser.add_argument(
+            "-vb",
+            "--vowel_binary",
+            action="store_true",
+            help="Use binary distance for vowels",
+            )
     args = parse_arguments()
     word1 = args.word1
     word2 = args.word2
@@ -119,7 +129,9 @@ if __name__ == "__main__":
         vowel_ratio=args.vowel_ratio,
         non_syllabic_penalty=args.non_syllabic_penalty,
         distance_type=args.distance_type,
-        use_same_phonome_offset=not args.disable_same_phonome_offset,
+        same_phonome_offset=not args.disable_same_phonome_offset,
+        consonant_binary=args.consonant_binary,
+        vowel_binary=args.vowel_binary,
     )
     distance = weighted_levenshtein.calculate(word1, word2)
     print(distance)
