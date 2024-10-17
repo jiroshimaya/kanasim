@@ -123,6 +123,18 @@ if __name__ == "__main__":
             action="store_true",
             help="Disable using the same phoneme distance as the offset for consonants and vowels",
         )
+        parser.add_argument(
+            "-cb",
+            "--consonant_binary",
+            action="store_true",
+            help="Disable using the same phoneme distance as the offset for consonants and vowels",
+        )
+        parser.add_argument(
+            "-vb",
+            "--vowel_binary",
+            action="store_true",
+            help="Disable using the same phoneme distance as the offset for consonants and vowels",
+        )
         return parser.parse_args()
 
     args = parse_arguments()
@@ -142,7 +154,9 @@ if __name__ == "__main__":
         vowel_ratio=args.vowel_ratio,
         non_syllabic_penalty=args.non_syllabic_penalty,
         distance_type=args.distance_type,
-        use_same_phonome_offset=not args.disable_same_phonome_offset,
+        consonant_binary=args.consonant_binary,
+        vowel_binary=args.vowel_binary,
+        same_phonome_offset=not args.disable_same_phonome_offset,
     )
 
     wordlist = load_wordlist(wordlist_path)
