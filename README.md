@@ -1,8 +1,8 @@
 # kanasim
-
+##### English | [日本語](./README.ja.md)
 This repository provides Japanese kana phonetic similarity data and a sample program to calculate word similarity using that data, which is used in the parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in projects where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
 
-### English | [日本語](./README.ja.md)
+
 ## Phonetic Similarity Data
 This is the distance data between consonants and consonants, and vowels and vowels, calculated using the acoustic model of the speech recognition software [julius](https://github.com/julius-speech/julius). It is stored in the following file:
 
