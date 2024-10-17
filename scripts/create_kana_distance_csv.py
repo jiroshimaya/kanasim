@@ -94,6 +94,12 @@ if __name__ == "__main__":
             default=1.0,
             help="Penalty for insertion, deletion or replacement of non syllabic phonemes like ン and ッ",
         )
+        parser.add_argument(
+            "-dspo",
+            "--disable_same_phonome_offset",
+            action="store_true",
+            help="Disable using the same phoneme distance as the offset for consonants and vowels",
+        )
         return parser.parse_args()
 
     args = parse_arguments()
@@ -106,6 +112,7 @@ if __name__ == "__main__":
         replace_penalty=args.replace_penalty,
         vowel_ratio=args.vowel_ratio,
         non_syllabic_penalty=args.non_syllabic_penalty,
+        use_same_phonome_offset=not args.disable_same_phonome_offset,
     )
 
     with open(args.output, "w", encoding="utf-8") as f:

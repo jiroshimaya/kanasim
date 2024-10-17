@@ -50,7 +50,7 @@ distance between バ and マ: 123.74445
 
 ## Sample code
 This sample code demonstrates how to calculate the weighted edit distance and Hamming distance between katakana words using phonetic similarity data.
-
+In the sample code, the similarity of the same phoneme is used as an offset by default and subtracted from the actual value. This means that the replacement cost for the same phoneme is set to 0. This is to prevent the insertion cost from being overestimated and to ensure that the calculation of the edit distance aligns with intuition when the replacement cost for the same phoneme is greater than 0.
 ### Installation
 
 ```
@@ -83,7 +83,7 @@ print(distance)
 ```
 
 ```
-200.886091
+22.74598650000001
 ```
 
 #### Batch Processing
@@ -105,22 +105,22 @@ for i, target_word in enumerate(words):
 
 ```
 distance between カナダ and ...
-カナダ 178.1401045
-バハマ 200.886091
-タバタ 192.4681245
-サワラ 194.542944
-カナタ 182.6082715
-カラダ 182.1072405
-カドマ 195.139055
+カナダ 0.0
+バハマ 22.74598650000001
+タバタ 14.328020000000006
+サワラ 16.4028395
+カナタ 4.468167000000005
+カラダ 3.967136
+カドマ 16.998950500000007
 
 distance between タハラ and ...
-カナダ 193.4058865
-バハマ 188.1496555
-タバタ 191.793173
-サワラ 189.8127135
-カナタ 195.881908
-カラダ 191.74239500000004
-カドマ 196.94274500000003
+カナダ 16.56518150000001
+バハマ 11.308950499999998
+タバタ 14.952468
+サワラ 12.972008500000001
+カナタ 19.041203000000007
+カラダ 14.90169000000001
+カドマ 20.102040000000006
 ```
 #### Ranking
 
@@ -137,13 +137,13 @@ for i, (w, d) in enumerate(ranking, 1):
 ```
 
 ```
-1: カナダ (178.1401045)
-2: カラダ (182.1072405)
-3: カナタ (182.6082715)
-4: タバタ (192.4681245)
-5: サワラ (194.542944)
-6: カドマ (195.139055)
-7: バハマ (200.886091)
+1: カナダ (0.0)
+2: カラダ (3.967136)
+3: カナタ (4.468167000000005)
+4: タバタ (14.328020000000006)
+5: サワラ (16.4028395)
+6: カドマ (16.998950500000007)
+7: バハマ (22.74598650000001)
 ```
 
 #### Weight Adjustment
@@ -173,11 +173,11 @@ for i, (w, d) in enumerate(topn, 1):
 
 ```
 vowel_ratio=0.2
-1: カナデ (188.8045896)
-2: サラダ (191.89464220000002)
+1: カナデ (8.397902000000006)
+2: サラダ (11.487954600000004)
 vowel_ratio=0.8
-1: サラダ (183.22081780000002)
-2: カナデ (191.4522024)
+1: サラダ (7.347296400000003)
+2: カナデ (15.578681000000007)
 ```
 
 
@@ -233,16 +233,16 @@ We compare the results of the commonly used unweighted Hamming distance, a measu
 Weighted Hamming Distance (Proposed)
 ```
 % python scripts/sort_by_weighted_edit_distance.py シマウマ -dt hamming
-シラウオ 245.4491025
-シマフグ 247.09242
-シロウオ 249.183228
-シマアジ 252.214438
-シマドジョー 253.49853149999998
-シマハギ 253.6594945
-ピライーバ 253.79645749999997
-チゴダラ 254.19401249999999
-シマダイ 255.194251
-ツマグロ 256.176311
+シラウオ 17.72447499999999
+シマフグ 19.3677925
+シロウオ 21.458600499999996
+シマアジ 24.4898105
+シマドジョー 25.773904000000005
+シマハギ 25.934866999999997
+ピライーバ 26.07182999999999
+チゴダラ 26.469384999999992
+シマダイ 27.469623499999994
+ツマグロ 28.451683499999998
 ```
 
 Unweighted Hamming Distance (Baseline)
@@ -283,8 +283,8 @@ for i, (w, d) in enumerate(topn, 1):
 
 ```
 vowel_ratio=0.0
-1: サラダ (194.78591699999998)
-2: コノデ (198.155687)
+1: サラダ (12.868174000000003)
+2: コノデ (16.23794400000002)
 ```
 
 In the above example, because the vowel_ratio is set to 0, "コノデ" (Konode), which matches the consonants of "カナダ" (Kanada), should ideally be ranked first, but it ends up in second place. If you want to strictly prioritize specific elements like vowel matching, you might need to use unweighted edit distance.

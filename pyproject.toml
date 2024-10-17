@@ -1,7 +1,7 @@
 [project]
 name = "kanasim"
 version = "0.0.0"
-description = "A repository for storing phonetic similarity data between Japanese kana characters"
+description = "Calculator of phonetic similarity (distance) between Japanese kana characters"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
