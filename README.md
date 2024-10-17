@@ -5,7 +5,7 @@ This repository provides Japanese kana phonetic similarity data and a sample pro
 ## Phonetic Similarity Data
 This is the distance data between consonants and consonants, and vowels and vowels, calculated using the acoustic model of the speech recognition software [julius](https://github.com/julius-speech/julius). It is stored in the following file:
 
-- [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonon_distance.csv)
+- [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/data/biphone/kana_to_phonon_distance.csv)
 
 The column names in CSV format are as follows:
 
