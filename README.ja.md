@@ -1,6 +1,6 @@
 # kanasim
 
-このリポジトリは、日本語のカナの音韻類似度データ、および、そのデータを使用して単語同士の類似度を求めるサンプルプログラムを提供します。
+このリポジトリは、日本語のカナの音韻類似度データ、および、そのデータを使用して単語同士の類似度を求めるサンプルプログラムを提供します。  
 このデータは、空耳歌詞の作詞支援アプリ「Soramimic」で使用されているものです。空耳以外にもダジャレやラップの自動生成など、音韻の類似度を定量的に見積もることが重要になってくる取り組みにおいて、活用できる可能性があると考えています。
 
 ## 使い方
@@ -241,14 +241,14 @@ HMM同士の「距離」はある音素のHMMの出力が別の音素のHMMか�
 
 重みなしの場合は、「シマアジ」「シマフグ」「シラウオ」が同一のスコアですが、重みありでは「シラウオ」「シマフグ」「シマアジ」の順にスコアの大小が計算されています。おそらくmとrが比較的近いために「シラウオ」が優先されたのだと思います。
 
-## 引用
+## 引用s
 
 このライブラリや類似度データを引用する場合は、以下を記載ください。
 
-@software{kanasim,
+@software{kanasim,  
   author={Jiro Shimaya},  
-  title={Kanasim: Japanese Kana Distance Data and Sample Code for Similarity Calculation},
-  url={https://github.com/jiroshimaya/kanasim},
-  year={2024},
-  month={10},
+  title={Kanasim: Japanese Kana Distance Data and Sample Code for Similarity Calculation},  
+  url={https://github.com/jiroshimaya/kanasim},  
+  year={2024},  
+  month={10},  
 }
