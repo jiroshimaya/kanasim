@@ -262,8 +262,8 @@ Unweighted Hamming Distance (Baseline)
 ```
 In the case of unweighted calculations, "シマアジ" (Shimaaji), "シマフグ" (Shimafugu), and "シラウオ" (Shirauo) have the same score. However, with weighting, the scores differ in the order of "シラウオ" (Shirauo), "シマフグ" (Shimafugu), and "シマアジ" (Shimaaji). This is likely because, in the distance data, "m" and "r" are relatively close, giving "シラウオ" (Shirauo) priority. Whether this aligns with actual perception depends on the application and requires consideration.
 
-### Subtle Influence of Vowels
-In the sample program, weights can be set when calculating distances, but because phonemes are distinguished by biphones, the influence of weights is less apparent compared to using simple edit distance.
+### Subtle Influence of vowel or consonant weights
+In the sample program, vowel or consonant weights can be set when calculating distances, but because phonemes are distinguished by biphones, the influence of weights is less apparent compared to using simple edit distance.
 
 ```Python
 from kanasim import create_kana_distance_calculator
