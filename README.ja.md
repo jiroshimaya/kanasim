@@ -1,17 +1,114 @@
 # kanasim
 
-このリポジトリは、日本語のカナの音韻類似度データ、および、そのデータを使用して単語同士の類似度を求めるサンプルプログラムを提供します。  
-このデータは、空耳歌詞の作詞支援アプリ「Soramimic」で使用されているものです。空耳以外にもダジャレやラップの自動生成など、音韻の類似度を定量的に見積もることが重要になってくる取り組みにおいて、活用できる可能性があると考えています。
+このリポジトリは、空耳歌詞の作詞支援アプリ「[Soramimic](https://soramimic.com)」で使用されている、日本語のカナの音韻類似度データと、そのデータを用いて単語間の類似度を計算するサンプルプログラムを提供します。  
+空耳に限らず、ダジャレやラップの自動生成など、音韻の類似度を定量的に評価することが重要なプロジェクトでの利用が期待されます。
 
-## 使い方
+## 音韻類似度データ
+音声認識ソフトウェア[julius](https://github.com/julius-speech/julius)の音響モデルに基づいて計算された子音同士、母音同士の距離のデータです。
+以下に格納されています。
+
+- [カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonon_distance.csv)
+
+csv形式で列名は以下です。
+
+- kana1: 1つ目のカナ（モーラ）
+- kana2: 2つめのカナ（モーラ）
+- consonant1: kana1の子音
+- consonant2: kana2の子音
+- vowel1: kana1の母音
+- vowel2: kana2の母音
+- distance_consonant: consonant1と2の距離
+- distance_vowel: vowel1と2の距離
+
+アプリケーションに応じて重みを調整できるように、子音と母音の距離を別々に管理しています。
+例えば以下のようにして、カナの類似度を得ることができます。
+
+```Python
+import pandas as pd
+# カナ-音素-類似度対応表を読み込む
+kana_df = pd.read_csv("src/kanasim/data/biphone/kana_to_phonon_distance.csv")
+# カナ-音素-類似度対応表を辞書に変換する
+kana_dict = {}
+for _, row in kana_df.iterrows():
+    kana_dict[(row["kana1"], row["kana2"])] = row["distance_consonant"] + row["distance_vowel"]
+
+# カナ-カナ間の距離をprint
+kana1, kana2 = "カ", "ナ"
+print(f"distance between {kana1} and {kana2}: {kana_dict[(kana1, kana2)]}")
+
+kana1, kana2 = "カ", "サ"
+print(f"distance between {kana1} and {kana2}: {kana_dict[(kana1, kana2)]}")
+
+kana1, kana2 = "バ", "マ"
+print(f"distance between {kana1} and {kana2}: {kana_dict[(kana1, kana2)]}")    
+```
+
+```
+distance between カ and ナ: 134.181978
+distance between カ and サ: 130.812428
+distance between バ and マ: 123.74445
+```
+
+## サンプルプログラム
+音韻類似度データに基づいて、カナ表記の単語同士の重み付き編集距離およびハミング距離を計算するサンプルプログラムです。
 
 ### インストール
 ```
 pip install .
 pip install jamorasep
 ```
+### スクリプト実行
 
-### 距離計算
+#### 単語の距離
+
+編集距離
+
+```sh
+python scripts/calculate_weighted_edit_distance.py カナダ バハマ
+```
+```
+200.886091
+```
+
+ハミング距離
+
+```sh
+python scripts/calculate_weighted_edit_distance.py カナダ バハマ -dt
+```
+```
+200.886091
+```
+
+オプション引数確認
+
+```sh
+python scripts/calculate_weighted_edit_distance.py -h
+```
+
+
+#### 距離に基づく単語リストのソート
+
+```sh
+python scripts/sort_by_weighted_edit_distance.py シマウマ -w data/sample/pro
+nunciation.txt 
+```
+
+```
+チンマ 245.211343
+シラウオ 245.4491025
+シマフグ 247.09242
+シシャモ 248.28343250000003
+イナダ 248.381759
+イワナ 248.408568
+ギマ 248.49013000000002
+シロウオ 249.183228
+キハダ 249.33099199999998
+シーラ 250.69318750000002
+```
+
+### pythonからの呼び出し
+
+#### 距離計算
 ```Python
 from kanasim import create_kana_distance_calculator
 
@@ -24,7 +121,7 @@ print(distance)
 200.886091
 ```
 
-### バッチ処理
+#### バッチ処理
 
 ```python
 from kanasim import create_kana_distance_calculator
@@ -60,7 +157,7 @@ distance between タハラ and ...
 カラダ 191.74239500000004
 カドマ 196.94274500000003
 ```
-### ランキング
+#### ランキング
 
 ```Python
 from kanasim import create_kana_distance_calculator
@@ -84,8 +181,7 @@ for i, (w, d) in enumerate(ranking, 1):
 7: バハマ (200.886091)
 ```
 
-### 重み調整
-#### 母音を重視する
+#### 重み調整
 
 ```Python
 from kanasim import create_kana_distance_calculator
@@ -119,36 +215,10 @@ vowel_ratio=0.8
 2: カナデ (191.4522024)
 ```
 
-注意点として、音素がbiphononで区別されるため、重みの影響はシンプルな編集距離を使う場合などに比べて、現れにくいです。
 
-```Python
-from kanasim import create_kana_distance_calculator
+## その他音韻類似度関係のファイル
+[カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonon_distance.csv)以外に3つのファイルがあります。
 
-# The vowel_ratio parameter determines the weight of vowels when calculating the distance between kana.
-# By default, it is set to 0.5, meaning vowels and consonants are weighted equally (1:1).
-calculator = create_kana_distance_calculator(vowel_ratio=0.0)
-
-word = "カナダ"
-wordlist = ["サラダ", "コノデ"]
-
-topn = calculator.get_topn(word, wordlist, n=10)
-print("vowel_ratio=0.0")
-for i, (w, d) in enumerate(topn, 1):
-    print(f"{i}: {w} ({d})")
-```
-
-```
-vowel_ratio=0.0
-1: サラダ (194.78591699999998)
-2: コノデ (198.155687)
-```
-
-上記ではvowel_ratioを0にしたため、「カナダ」と子音が一致する「コノデ」が1位になってほしいですが、2位になってしまっています。
-母音の一致など特定の要素を厳密に重視したい場合は、編集距離などを用いる必要があるかもしれません。
-
-
-## 音韻類似度データ
-以下に格納されています。
 
 - [子音距離](src/kanasim/data/biphone/distance_consonants_bi.csv)
 - [母音距離](src/kanasim/data/biphone/distance_vowels_bi.csv)
@@ -239,6 +309,34 @@ HMM同士の「距離」はある音素のHMMの出力が別の音素のHMMか�
 ```
 重みなしの場合は、「シマアジ」「シマフグ」「シラウオ」が同一のスコアですが、重みありでは「シラウオ」「シマフグ」「シマアジ」の順にスコアの大小が計算されています。おそらく距離データ上、mとrが比較的近いために「シラウオ」が優先されたのだと思います。実際の感覚がこれとあうかはアプリケーションにもよりますし、要検討だと思います。
 
+### 母音の影響の現れにくさ
+サンプルプログラムにて距離を足し合わせるときの重みが設定できますが、音素がバイフォンで区別されるため、重みの影響はシンプルな編集距離を使う場合などに比べて、現れにくいです。
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+# The vowel_ratio parameter determines the weight of vowels when calculating the distance between kana.
+# By default, it is set to 0.5, meaning vowels and consonants are weighted equally (1:1).
+calculator = create_kana_distance_calculator(vowel_ratio=0.0)
+
+word = "カナダ"
+wordlist = ["サラダ", "コノデ"]
+
+topn = calculator.get_topn(word, wordlist, n=10)
+print("vowel_ratio=0.0")
+for i, (w, d) in enumerate(topn, 1):
+    print(f"{i}: {w} ({d})")
+```
+
+```
+vowel_ratio=0.0
+1: サラダ (194.78591699999998)
+2: コノデ (198.155687)
+```
+
+上記ではvowel_ratioを0にしたため、「カナダ」と子音が一致する「コノデ」が1位になってほしいですが、2位になってしまっています。
+母音の一致など特定の要素を厳密に重視したい場合は、編集距離などを用いる必要があるかもしれません。
+
 ## 引用
 
 このライブラリや類似度データを引用する場合は、以下を記載ください。
@@ -252,3 +350,8 @@ HMM同士の「距離」はある音素のHMMの出力が別の音素のHMMか�
   month={10},  
 }
 ```
+
+# 参考資料
+
+- A. Lee and T. Kawahara: Julius v4.5 (2019) https://doi.org/10.5281/zenodo.2530395
+- [音響モデルから音素間の距離を求める | 見返すかもしれないメモ](https://yaamaa-memo.hatenablog.com/entry/2017/12/17/062435)

@@ -1,69 +1,118 @@
-import csv
-from kanasim import WeightedLevenshtein, extend_long_vowel_moras
-
-
-def load_csv(path: str) -> list[dict[str, str]]:
-    with open(path, "r", encoding="utf-8") as f:
-        return list(csv.DictReader(f))
-
-
-def load_distance_csv(path: str) -> dict[tuple[str, str], float]:
-    distance_dict = {}
-    distance_list = load_csv(path)
-    for row in distance_list:
-        kana1 = row["kana1"]
-        kana2 = row["kana2"]
-        distance = (
-            float(row["distance"]) if "." in row["distance"] else int(row["distance"])
-        )
-        distance_dict[(kana1, kana2)] = distance
-    return distance_dict
-
-
 if __name__ == "__main__":
     import argparse
+    import os
+    from kanasim import create_kana_distance_calculator
+    default_kana2phonon_csv = os.path.join(
+        os.path.dirname(__file__), "../src/kanasim/data/biphone/kana2phonon_bi.csv"
+    )
+    default_distance_vowels_csv = os.path.join(
+        os.path.dirname(__file__), "../src/kanasim/data/biphone/distance_vowels_bi.csv"
+    )
+    default_distance_consonants_csv = os.path.join(
+        os.path.dirname(__file__),
+        "../src/kanasim/data/biphone/distance_consonants_bi.csv",
+    )
 
     def parse_arguments():
         parser = argparse.ArgumentParser(
             description="Calculate weighted edit distance between two words."
         )
-        parser.add_argument("word1", type=str, help="The first word")
-        parser.add_argument("word2", type=str, help="The second word")
+        parser.add_argument(
+            "word1", type=str, help="Word 1 written in katakana"
+        )
+        parser.add_argument(
+            "word2", type=str, help="Word 2 written in katakana"
+        )
         parser.add_argument(
             "-k",
-            "--kana_distance_csv",
+            "--kana2phonon",
             type=str,
             required=False,
-            help="Path to the kana distance CSV file",
+            default=default_kana2phonon_csv,
+            help="Path to the kana2phonon CSV file",
+        )
+        parser.add_argument(
+            "-v",
+            "--distance_vowels",
+            type=str,
+            required=False,
+            default=default_distance_vowels_csv,
+            help="Path to the distance_vowels CSV file",
+        )
+        parser.add_argument(
+            "-c",
+            "--distance_consonants",
+            type=str,
+            required=False,
+            default=default_distance_consonants_csv,
+            help="Path to the distance_consonants CSV file",
+        )
+        parser.add_argument(
+            "-ip",
+            "--insert_penalty",
+            type=float,
+            required=False,
+            default=1.0,
+            help="Penalty for insertion",
+        )
+        parser.add_argument(
+            "-dp",
+            "--delete_penalty",
+            type=float,
+            required=False,
+            default=1.0,
+            help="Penalty for deletion",
+        )
+        parser.add_argument(
+            "-rp",
+            "--replace_penalty",
+            type=float,
+            required=False,
+            default=1.0,
+            help="Penalty for replacement",
+        )
+        parser.add_argument(
+            "-vr",
+            "--vowel_ratio",
+            type=float,
+            required=False,
+            default=0.5,
+            help="Ratio for vowels",
+        )
+        parser.add_argument(
+            "-nsp",
+            "--non_syllabic_penalty",
+            type=float,
+            required=False,
+            default=1.0,
+            help="Penalty for insertion, deletion or replacement of non-syllabic moras like ン and ッ",
+        )
+        parser.add_argument(
+            "-dt",
+            "--distance_type",
+            type=str,
+            default="levenshtein",
+            help="Distance type (levenshtein or hamming)",
         )
         return parser.parse_args()
 
     args = parse_arguments()
     word1 = args.word1
     word2 = args.word2
-    kana_distance_csv = args.kana_distance_csv
-    distance_dict = load_distance_csv(kana_distance_csv)
+    kana2phonon_csv = args.kana2phonon
+    distance_vowels_csv = args.distance_vowels
+    distance_consonants_csv = args.distance_consonants
 
-    def insert_cost_func(kana: str) -> int:
-        return distance_dict[("sp", kana)]
-
-    def delete_cost_func(kana: str) -> int:
-        return distance_dict[(kana, "sp")]
-
-    def replace_cost_func(kana1: str, kana2: str) -> int:
-        return distance_dict[(kana1, kana2)]
-
-    def preprocess_func(text: str) -> list[str]:
-        return extend_long_vowel_moras(text)
-
-    weighted_levenshtein = WeightedLevenshtein(
-        insert_cost_func=insert_cost_func,
-        delete_cost_func=delete_cost_func,
-        replace_cost_func=replace_cost_func,
-        preprocess_func=preprocess_func,
+    weighted_levenshtein = create_kana_distance_calculator(
+        kana2phonon_csv=kana2phonon_csv,
+        distance_vowels_csv=distance_vowels_csv,
+        distance_consonants_csv=distance_consonants_csv,
+        insert_penalty=args.insert_penalty,
+        delete_penalty=args.delete_penalty,
+        replace_penalty=args.replace_penalty,
+        vowel_ratio=args.vowel_ratio,
+        non_syllabic_penalty=args.non_syllabic_penalty,
+        distance_type=args.distance_type,
     )
-
     distance = weighted_levenshtein.calculate(word1, word2)
     print(distance)
-
-    # You can now use word1, word2, and kana_distance_csv in your script
