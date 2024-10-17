@@ -288,6 +288,8 @@ vowel_ratio=0.0
 ```
 
 In the above example, because the vowel_ratio is set to 0, "コノデ" (Konode), which matches the consonants of "カナダ" (Kanada), should ideally be ranked first, but it ends up in second place. If you want to strictly prioritize specific elements like vowel matching, you might need to use unweighted edit distance.
+In the manual tests conducted, the influence of vowels was found to be greater than that of consonants, and even when the vowel_ratio was set to 0, consonant matching was not prioritized. This is likely because, in Japanese, vowels often characterize the phonetics of kana, and a similar tendency is observed in this data based on Japanese acoustic models. If you want to emphasize consonant matching, using unweighted edit distance might be more appropriate.
+
 
 ## Citation
 
