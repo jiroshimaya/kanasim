@@ -94,6 +94,12 @@ if __name__ == "__main__":
             default="levenshtein",
             help="Distance type (levenshtein or hamming)",
         )
+        parser.add_argument(
+            "-dspo",
+            "--disable_same_phonome_offset",
+            action="store_true",
+            help="Disable using the same phoneme distance as the offset for consonants and vowels",
+        )
         return parser.parse_args()
 
     args = parse_arguments()
@@ -113,6 +119,7 @@ if __name__ == "__main__":
         vowel_ratio=args.vowel_ratio,
         non_syllabic_penalty=args.non_syllabic_penalty,
         distance_type=args.distance_type,
+        use_same_phonome_offset=not args.disable_same_phonome_offset,
     )
     distance = weighted_levenshtein.calculate(word1, word2)
     print(distance)

@@ -43,12 +43,25 @@ def create_kana_distance_list(
     insert_penalty: float,
     delete_penalty: float,
     replace_penalty: float,
+    use_same_phonome_offset: bool
 ) -> list[dict]:
     if not (0 <= vowel_ratio <= 1):
         raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
     kana2phonome = load_csv(kana2phonome_csv)
-    distance_consonants = load_phonome_distance_csv(distance_consonants_csv)
-    distance_vowels = load_phonome_distance_csv(distance_vowels_csv)
+    distance_consonants_raw = load_phonome_distance_csv(distance_consonants_csv)
+    distance_vowels_raw = load_phonome_distance_csv(distance_vowels_csv)
+    distance_consonants = {}
+    distance_vowels = {}
+    if use_same_phonome_offset:
+        for phoneme1, phoneme2 in distance_consonants_raw.keys():
+            offset = distance_consonants_raw[(phoneme1, phoneme1)]
+            distance_consonants[(phoneme1, phoneme2)] = max(0, distance_consonants_raw[(phoneme1, phoneme2)] - offset)
+        for phoneme1, phoneme2 in distance_vowels_raw.keys():
+            offset = distance_vowels_raw[(phoneme1, phoneme1)]
+            distance_vowels[(phoneme1, phoneme2)] = max(0, distance_vowels_raw[(phoneme1, phoneme2)] - offset)
+    else:
+        distance_consonants = distance_consonants_raw
+        distance_vowels = distance_vowels_raw
 
     results = []
     for row1 in kana2phonome:
@@ -409,7 +422,8 @@ def create_kana_distance_calculator(
     vowel_ratio: float = 0.5,
     non_syllabic_penalty: float = 0.2,
     preprocess_func: Callable[[str], list[str]] | None = extend_long_vowel_moras,
-    distance_type: str = "levenshtein"
+    distance_type: str = "levenshtein",
+    use_same_phonome_offset: bool = True,
 ) -> WeightedLevenshtein | WeightedHamming:
     distance_list = create_kana_distance_list(
         kana2phonome_csv=kana2phonome_csv,
@@ -420,6 +434,7 @@ def create_kana_distance_calculator(
         replace_penalty=replace_penalty,
         vowel_ratio=vowel_ratio,
         non_syllabic_penalty=non_syllabic_penalty,
+        use_same_phonome_offset=use_same_phonome_offset,
     )
     distance_dict = {}
     for row in distance_list:
@@ -440,8 +455,8 @@ def create_kana_distance_calculator(
     if distance_type == "levenshtein":
         return WeightedLevenshtein(
             insert_cost_func=insert_cost_func,
-        delete_cost_func=delete_cost_func,
-        replace_cost_func=replace_cost_func,
+            delete_cost_func=delete_cost_func,
+            replace_cost_func=replace_cost_func,
             preprocess_func=preprocess_func,
         )
     elif distance_type == "hamming":
