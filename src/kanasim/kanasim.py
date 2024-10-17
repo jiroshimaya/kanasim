@@ -22,20 +22,20 @@ def load_kana_distance_csv(path: str) -> dict[tuple[str, str], float]:
     return distance_dict
 
 
-def load_phonon_distance_csv(path: str) -> dict[tuple[str, str], float]:
+def load_phonome_distance_csv(path: str) -> dict[tuple[str, str], float]:
     distance_dict = {}
     distance_list = load_csv(path)
     for row in distance_list:
-        phonon1 = row["phonon1"]
-        phonon2 = row["phonon2"]
+        phonome1 = row["phonome1"]
+        phonome2 = row["phonome2"]
         distance = float(row["distance"])
-        distance_dict[(phonon1, phonon2)] = distance
+        distance_dict[(phonome1, phonome2)] = distance
     return distance_dict
 
 
 def create_kana_distance_list(
     *,
-    kana2phonon_csv: str,
+    kana2phonome_csv: str,
     distance_consonants_csv: str,
     distance_vowels_csv: str,
     vowel_ratio: float,
@@ -46,13 +46,13 @@ def create_kana_distance_list(
 ) -> list[dict]:
     if not (0 <= vowel_ratio <= 1):
         raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
-    kana2phonon = load_csv(kana2phonon_csv)
-    distance_consonants = load_phonon_distance_csv(distance_consonants_csv)
-    distance_vowels = load_phonon_distance_csv(distance_vowels_csv)
+    kana2phonome = load_csv(kana2phonome_csv)
+    distance_consonants = load_phonome_distance_csv(distance_consonants_csv)
+    distance_vowels = load_phonome_distance_csv(distance_vowels_csv)
 
     results = []
-    for row1 in kana2phonon:
-        for row2 in kana2phonon:
+    for row1 in kana2phonome:
+        for row2 in kana2phonome:
             kana1 = row1["kana"]
             kana2 = row2["kana"]
             consonant1 = row1["consonant"]
@@ -394,8 +394,8 @@ class WeightedHamming:
 
 def create_kana_distance_calculator(
     *,
-    kana2phonon_csv: str = os.path.join(
-        os.path.dirname(__file__), "data/biphone/kana2phonon_bi.csv"
+    kana2phonome_csv: str = os.path.join(
+        os.path.dirname(__file__), "data/biphone/kana2phonome_bi.csv"
     ),
     distance_consonants_csv: str = os.path.join(
         os.path.dirname(__file__), "data/biphone/distance_consonants_bi.csv"
@@ -412,7 +412,7 @@ def create_kana_distance_calculator(
     distance_type: str = "levenshtein"
 ) -> WeightedLevenshtein | WeightedHamming:
     distance_list = create_kana_distance_list(
-        kana2phonon_csv=kana2phonon_csv,
+        kana2phonome_csv=kana2phonome_csv,
         distance_consonants_csv=distance_consonants_csv,
         distance_vowels_csv=distance_vowels_csv,
         insert_penalty=insert_penalty,

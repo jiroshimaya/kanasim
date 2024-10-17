@@ -1,12 +1,13 @@
 # kanasim
-##### English | [日本語](./README.ja.md)
-This repository provides Japanese kana phonetic similarity data and a sample code to calculate word similarity using that data, which is used in the parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in projects where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
 
+This repository provides Japanese kana phonetic similarity data and a sample code to calculate word similarity using that data, which is used in the parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in applications where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
+
+English | [日本語](./README.ja.md)
 
 ## Phonetic Similarity Data
-This is the distance data between consonants and consonants, and vowels and vowels, calculated using the acoustic model of the speech recognition software [julius](https://github.com/julius-speech/julius). It is stored in the following file:
+This data represents the distances between consonants and between vowels, calculated using the acoustic model from the speech recognition software [julius](https://github.com/julius-speech/julius). It is stored in the following file:
 
-- [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/data/biphone/kana_to_phonon_distance.csv)
+- [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/data/biphone/kana_to_phonome_distance.csv)
 
 The column names in CSV format are as follows:
 
@@ -24,7 +25,7 @@ By managing the distances between consonants and vowels separately, it is possib
 ```Python
 import pandas as pd
 # Load the Kana-Phoneme-Similarity Correspondence Table
-kana_df = pd.read_csv("src/kanasim/data/biphone/kana_to_phonon_distance.csv")
+kana_df = pd.read_csv("src/kanasim/data/biphone/kana_to_phonome_distance.csv")
 # Convert the Kana-Phoneme-Similarity Correspondence Table to a dictionary
 kana_dict = {}
 for _, row in kana_df.iterrows():
@@ -48,7 +49,7 @@ distance between バ and マ: 123.74445
 ```
 
 ## Sample code
-This is a sample program to calculate the weighted edit distance and Hamming distance between words written in katakana using phonetic similarity data.
+This sample code demonstrates how to calculate the weighted edit distance and Hamming distance between katakana words using phonetic similarity data.
 
 ### Installation
 
@@ -181,18 +182,18 @@ vowel_ratio=0.8
 
 
 ## Other Phonetic Similarity Related Files
-In addition to the [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonon_distance.csv), there are three other files. These files are integrated into the Kana-Phoneme-Similarity Correspondence Table, so you usually do not need to refer to them directly.
+In addition to the [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonome_distance.csv), there are three other files. These files are integrated into the Kana-Phoneme-Similarity Correspondence Table, so you usually do not need to refer to them directly.
 
 - [Consonant Distance](src/kanasim/data/biphone/distance_consonants_bi.csv)
 - [Vowel Distance](src/kanasim/data/biphone/distance_vowels_bi.csv)
-- [Kana-Phoneme Correspondence Table](src/kanasim/data/biphone/kana2phonon_bi.csv)
+- [Kana-Phoneme Correspondence Table](src/kanasim/data/biphone/kana2phonome_bi.csv)
 
 ### Consonant and Vowel Distances
 The CSV format includes the following column names:
 
-- phonon1: The first phoneme
-- phonon2: The second phoneme
-- distance: The distance between phonon1 and phonon2
+- phonome1: The first phoneme
+- phonome2: The second phoneme
+- distance: The distance between phonome1 and phonome2
 
 Phonons are described in a biphone format with adjacent phonemes, excluding silence (sp), geminate consonants (q), and nasal sounds (N) ([reference](https://ftp.jaist.ac.jp/pub/osdn.net/julius/47534/Juliusbook-4.1.5-ja.pdf#page=37)).
 For consonants, it is a biphone with the following vowel. The following vowel is separated by `+`.
@@ -200,7 +201,7 @@ For example, `b+a` means a consonant b immediately before a vowel a.
 For vowels, it is a biphone with the preceding consonant. The preceding consonant is separated by `-`.
 For example, `b-a` means a vowel a immediately after a consonant b.
 
-A smaller distance indicates a higher similarity. Although referred to as "distance," swapping phonon1 and phonon2 results in different values, so it does not meet the strict definition of distance. Also, the "distance" of the same phoneme is not zero.
+A smaller distance indicates a higher similarity. Although referred to as "distance," swapping phonome1 and phonome2 results in different values, so it does not meet the strict definition of distance. Also, the "distance" of the same phoneme is not zero.
 
 ### Kana-Phoneme Correspondence Table
 The CSV format includes the following column names:
@@ -223,7 +224,7 @@ To reduce computation time, the calculation targets for phonemes and kana are li
 ### Visualization
 The positional relationships of phonemes calculated using the above method are shown in a diagram mapped by multidimensional scaling. Since there are too many elements in biphones, the diagram is based on monophone calculations. It can be seen that phonemes belonging to the same category, such as palatal sounds, voiced sounds, voiceless sounds, and vowels, are somewhat close to each other.
 
-![Phoneme Positional Relationships](docs/pictures/phonon_distance_2d.png)
+![Phoneme Positional Relationships](docs/pictures/phonome_distance_2d.png)
 
 
 ### Comparison with Baseline
