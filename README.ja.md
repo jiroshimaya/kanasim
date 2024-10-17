@@ -2,11 +2,11 @@
 
 このリポジトリは、空耳歌詞の作詞支援アプリ「[Soramimic](https://soramimic.com)」で使用されている、日本語のカナの音韻類似度データと、そのデータを用いて単語間の類似度を計算するサンプルプログラムを提供します。  
 空耳に限らず、ダジャレやラップの自動生成など、音韻の類似度を定量的に評価することが重要なプロジェクトでの利用が期待されます。
-
+### [English](./README.md) | 日本語
 ## 音韻類似度データ
 音声認識ソフトウェア[julius](https://github.com/julius-speech/julius)の音響モデルを使用して計算された、子音間および母音間の距離データです。以下に保存されています。
 
-- [カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonon_distance.csv)
+- [カナ-音素-類似度対応表](src/kanasim/data/biphone/kana_to_phonon_distance.csv)
 
 csv形式で列名は以下です。
 
