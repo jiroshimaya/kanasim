@@ -1,6 +1,6 @@
 # kanasim
 ##### English | [日本語](./README.ja.md)
-This repository provides Japanese kana phonetic similarity data and a sample program to calculate word similarity using that data, which is used in the parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in projects where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
+This repository provides Japanese kana phonetic similarity data and a sample code to calculate word similarity using that data, which is used in the parody lyrics creation support app "[Soramimic](https://soramimic.com)." It is expected to be used in projects where it is important to quantitatively evaluate phonetic similarity, such as puns and automatic generation of rap lyrics, not limited to parody lyrics.
 
 
 ## Phonetic Similarity Data
@@ -47,12 +47,17 @@ distance between カ and サ: 130.812428
 distance between バ and マ: 123.74445
 ```
 
-## Sample Program
+## Sample code
 This is a sample program to calculate the weighted edit distance and Hamming distance between words written in katakana using phonetic similarity data.
 
 ### Installation
 
+```
+pip install .
+pip install jamorasep
+```
 
+### Using in terminal
 
 ```sh
 # Edit distance
@@ -65,7 +70,7 @@ python scripts/calculate_weighted_edit_distance.py カナダ バハマ -dt
 python scripts/sort_by_weighted_edit_distance.py シマウマ -w data/sample/pro
 nunciation.txt 
 ```
-### Using in Python
+### Using in Python code
 
 #### Distance Calculation
 ```Python
