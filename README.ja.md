@@ -246,7 +246,7 @@ HMM同士の「距離」はある音素のHMMの出力が別の音素のHMMか�
 このライブラリや類似度データを引用する場合は、以下を記載ください。
 
 @software{kanasim,
-  author={Jiro Shimaya},
+  author={Jiro Shimaya},  
   title={Kanasim: Japanese Kana Distance Data and Sample Code for Similarity Calculation},
   url={https://github.com/jiroshimaya/kanasim},
   year={2024},
