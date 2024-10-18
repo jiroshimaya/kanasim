@@ -212,7 +212,7 @@ The CSV format includes the following column names:
 - vowel_mono: Optional. The phoneme representing the vowel of the kana in monophone format.
 
 ## Data Creation Method
-This was derived based on the DNNHMM model of the Julius speech recognition model. The following method was referenced:
+This was derived based on the GMM-HMM model of the Julius speech recognition model. The following method was referenced:
 
 - [音響モデルから音素間の距離を求める | 見返すかもしれないメモ](https://yaamaa-memo.hatenablog.com/entry/2017/12/17/062435)
 
