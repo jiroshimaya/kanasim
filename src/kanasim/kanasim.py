@@ -1,7 +1,7 @@
 import csv
 import os
 from typing import Callable
-#from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Any
+# from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Any
 
 
 def load_csv(path: str) -> list[dict[str, str]]:
@@ -45,33 +45,41 @@ def create_kana_distance_list(
     replace_penalty: float,
     same_phonome_offset: bool,
     consonant_binary: bool,
-    vowel_binary: bool
+    vowel_binary: bool,
 ) -> list[dict]:
     if not (0 <= vowel_ratio <= 1):
         raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
     kana2phonome = load_csv(kana2phonome_csv)
     distance_consonants_raw = load_phonome_distance_csv(distance_consonants_csv)
     distance_vowels_raw = load_phonome_distance_csv(distance_vowels_csv)
-    
-    
+
     if consonant_binary:
-        distance_consonants_raw = {phoneme: 0 if phoneme[0].split("+")[0] == phoneme[1].split("+")[0] else 1 for phoneme in distance_consonants_raw}
+        distance_consonants_raw = {
+            phoneme: 0 if phoneme[0].split("+")[0] == phoneme[1].split("+")[0] else 1
+            for phoneme in distance_consonants_raw
+        }
     if vowel_binary:
-        distance_vowels_raw = {phoneme: 0 if phoneme[0].split("-")[-1] == phoneme[1].split("-")[-1] else 1 for phoneme in distance_vowels_raw}
-    
+        distance_vowels_raw = {
+            phoneme: 0 if phoneme[0].split("-")[-1] == phoneme[1].split("-")[-1] else 1
+            for phoneme in distance_vowels_raw
+        }
+
     distance_consonants = {}
     distance_vowels = {}
     if same_phonome_offset:
         for phoneme1, phoneme2 in distance_consonants_raw.keys():
             offset = distance_consonants_raw[(phoneme1, phoneme1)]
-            distance_consonants[(phoneme1, phoneme2)] = max(0, distance_consonants_raw[(phoneme1, phoneme2)] - offset)
+            distance_consonants[(phoneme1, phoneme2)] = max(
+                0, distance_consonants_raw[(phoneme1, phoneme2)] - offset
+            )
         for phoneme1, phoneme2 in distance_vowels_raw.keys():
             offset = distance_vowels_raw[(phoneme1, phoneme1)]
-            distance_vowels[(phoneme1, phoneme2)] = max(0, distance_vowels_raw[(phoneme1, phoneme2)] - offset)
+            distance_vowels[(phoneme1, phoneme2)] = max(
+                0, distance_vowels_raw[(phoneme1, phoneme2)] - offset
+            )
     else:
         distance_consonants = distance_consonants_raw
         distance_vowels = distance_vowels_raw
-
 
     results = []
     for row1 in kana2phonome:
@@ -169,9 +177,7 @@ class WeightedLevenshtein:
             word2 = self.preprocess_func(word2)
         return self._calculate(word1, word2)
 
-    def calculate_batch(
-        self, words1: list[str], words2: list[str]
-    ) -> list[float]:
+    def calculate_batch(self, words1: list[str], words2: list[str]) -> list[float]:
         if self.preprocess_func:
             words1 = [self.preprocess_func(word1) for word1 in words1]
             words2 = [self.preprocess_func(word2) for word2 in words2]
@@ -183,7 +189,9 @@ class WeightedLevenshtein:
             results.append(result)
         return results
 
-    def get_topn(self, word: str, wordlist: list[str], n: int = 10) -> list[tuple[str, float]]:
+    def get_topn(
+        self, word: str, wordlist: list[str], n: int = 10
+    ) -> list[tuple[str, float]]:
         """
         Get the top n similar lists from the given list.
 
@@ -211,9 +219,7 @@ class WeightedLevenshtein:
         """
         return self._calculate_helper(word1, word2, len(word1), len(word2))
 
-    def _calculate_helper(
-        self, word1: str, word2: str, m: int, n: int
-    ) -> float:
+    def _calculate_helper(self, word1: str, word2: str, m: int, n: int) -> float:
         """
         A helper function to recursively calculate the weighted Levenshtein distance between two lists of strings.
 
@@ -339,10 +345,7 @@ class WeightedHamming:
             word2 = self.preprocess_func(word2)
         return self._calculate(word1, word2)
 
-    def calculate_batch(
-        self, words1: list[str], words2: list[str]
-        
-    ) -> list[float]:
+    def calculate_batch(self, words1: list[str], words2: list[str]) -> list[float]:
         if self.preprocess_func:
             words1 = [self.preprocess_func(word1) for word1 in words1]
             words2 = [self.preprocess_func(word2) for word2 in words2]
@@ -354,7 +357,9 @@ class WeightedHamming:
             results.append(result)
         return results
 
-    def get_topn(self, word: str, wordlist: list[str], n: int = 10) -> list[tuple[str, float]]:
+    def get_topn(
+        self, word: str, wordlist: list[str], n: int = 10
+    ) -> list[tuple[str, float]]:
         """
         Get the top n similar words from the given list based on weighted Hamming distance.
 
@@ -381,12 +386,10 @@ class WeightedHamming:
             float: The calculated weighted Hamming distance.
         """
         if len(word1) != len(word2):
-            return float('inf')
+            return float("inf")
         return self._calculate_helper(word1, word2, len(word1))
 
-    def _calculate_helper(
-        self, word1: str, word2: str, length: int
-    ) -> float:
+    def _calculate_helper(self, word1: str, word2: str, length: int) -> float:
         """
         A helper function to calculate the weighted Hamming distance between two strings.
 

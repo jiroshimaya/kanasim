@@ -4,7 +4,10 @@ import jamorasep
 import logging
 
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 def load_wordlist(path: str) -> list[str]:
     logging.debug(f"Loading wordlist from {path}")
@@ -39,7 +42,7 @@ def hamming_distance(str1: str, str2: str) -> int:
     logging.debug(f"Calculating Hamming distance between '{str1}' and '{str2}'")
     if len(str1) != len(str2):
         logging.debug("Strings have different lengths, returning infinity")
-        return float('inf')
+        return float("inf")
     distance = sum(el1 != el2 for el1, el2 in zip(str1, str2))
     logging.debug(f"Hamming distance: {distance}")
     return distance
@@ -120,7 +123,7 @@ if __name__ == "__main__":
             filtered_surface_pronunciations.append(pronunciation)
     logging.debug(f"Filtered wordlist: {filtered_wordlist}")
     logging.debug(f"Filtered surface pronunciations: {filtered_surface_pronunciations}")
-            
+
     consonant_pronunciations = []
     vowel_pronunciations = []
     for surface_pronunciation in filtered_surface_pronunciations:
@@ -131,7 +134,7 @@ if __name__ == "__main__":
     logging.debug(f"Vowel pronunciations: {vowel_pronunciations}")
 
     surface_distances = [
-        hamming_distance(surface_word, pronunciation) 
+        hamming_distance(surface_word, pronunciation)
         for pronunciation in filtered_surface_pronunciations
     ]
     logging.debug(f"Surface distances: {surface_distances}")
@@ -142,7 +145,7 @@ if __name__ == "__main__":
     ]
     logging.debug(f"Consonant distances: {consonant_distances}")
     vowel_distances = [
-        hamming_distance(vowel_word, pronunciation) 
+        hamming_distance(vowel_word, pronunciation)
         for pronunciation in vowel_pronunciations
     ]
     logging.debug(f"Vowel distances: {vowel_distances}")
@@ -157,7 +160,9 @@ if __name__ == "__main__":
         )
         distances.append(distance)
     logging.debug(f"Combined distances: {distances}")
-    wordlist_with_distance = [(row, distances[i]) for i, row in enumerate(filtered_wordlist)]
+    wordlist_with_distance = [
+        (row, distances[i]) for i, row in enumerate(filtered_wordlist)
+    ]
     sorted_wordlist = sorted(wordlist_with_distance, key=lambda x: x[1])
     logging.debug(f"Sorted wordlist: {sorted_wordlist}")
     for word, distance in sorted_wordlist[: args.topn]:

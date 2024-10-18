@@ -2,6 +2,7 @@ if __name__ == "__main__":
     import argparse
     import os
     from kanasim import create_kana_distance_calculator
+
     default_kana2phonome_csv = os.path.join(
         os.path.dirname(__file__), "../src/kanasim/data/biphone/kana2phonome_bi.csv"
     )
@@ -17,12 +18,8 @@ if __name__ == "__main__":
         parser = argparse.ArgumentParser(
             description="Calculate weighted edit distance between two words."
         )
-        parser.add_argument(
-            "word1", type=str, help="Word 1 written in katakana"
-        )
-        parser.add_argument(
-            "word2", type=str, help="Word 2 written in katakana"
-        )
+        parser.add_argument("word1", type=str, help="Word 1 written in katakana")
+        parser.add_argument("word2", type=str, help="Word 2 written in katakana")
         parser.add_argument(
             "-k",
             "--kana2phonome",
@@ -111,7 +108,8 @@ if __name__ == "__main__":
             "--vowel_binary",
             action="store_true",
             help="Use binary distance for vowels",
-            )
+        )
+
     args = parse_arguments()
     word1 = args.word1
     word2 = args.word2
