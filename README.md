@@ -2,7 +2,7 @@
 
 This repository provides phonetic similarity data for kana, calculated using a Japanese acoustic model, along with sample programs that utilize this data to compute word similarity. This similarity data is used in the lyric creation support app "Soramimic" (https://soramimic.com). It is expected to be useful in applications where quantitatively evaluating phonetic similarity is important, such as in the automatic generation of puns or rap lyrics, not just for misheard lyrics.
 
-#### English | [日本語](./README.ja.md)
+#### English | [日本語](https://github.com/jiroshimaya/kanasim/blob/main/README.ja.md)
 
 ## Phonetic Similarity Data
 This data represents the distances between consonants and between vowels, calculated using the acoustic model from the open source speech recognition software [julius](https://github.com/julius-speech/julius). It is stored in the following file:
@@ -53,8 +53,17 @@ This sample code demonstrates how to calculate the weighted edit distance and Ha
 In the sample code, the similarity of the same phoneme is used as an offset by default and subtracted from the actual value. This means that the replacement cost for the same phoneme is set to 0. This is to prevent the insertion cost from being overestimated and to ensure that the calculation of the edit distance aligns with intuition when the replacement cost for the same phoneme is greater than 0.
 ### Installation
 
+- Install from source (Recommend)
+
 ```
 pip install .
+pip install jamorasep
+```
+
+- Install from PyPI
+
+```
+pip install kanasim
 pip install jamorasep
 ```
 
