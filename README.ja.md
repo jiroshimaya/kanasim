@@ -311,7 +311,18 @@ vowel_ratio=0.0
 }
 ```
 
-# 参考資料
+## 参考資料
 
 - A. Lee and T. Kawahara: Julius v4.5 (2019) https://doi.org/10.5281/zenodo.2530395
 - [音響モデルから音素間の距離を求める | 見返すかもしれないメモ](https://yaamaa-memo.hatenablog.com/entry/2017/12/17/062435)
+
+# 開発者向け
+
+- パッケージ管理に[uv](https://github.com/astral-sh/uv)を使用しています。
+- コマンド管理に[taskipy](https://github.com/taskipy/taskipy)を使用しています。
+
+```
+uv run task test
+uv run task lint
+uv run task format
+```
