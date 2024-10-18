@@ -4,7 +4,7 @@
 この類似度データは、空耳歌詞の作詞支援アプリ「[Soramimic](https://soramimic.com)」で利用されています。
 空耳に限らず、ダジャレやラップの自動生成など、音韻の類似度を定量的に評価することが重要なアプリケーションでの利用が期待されます。
 
-#### [English](./README.md) | 日本語
+#### [English](https://github.com/jiroshimaya/kanasim/blob/main/README.md) | 日本語
 
 ## 音韻類似度データ
 オープンソースの音声認識ソフトウェア[julius](https://github.com/julius-speech/julius)の音響モデルを使用して計算された、子音間および母音間の距離データです。以下に保存されています。
@@ -56,8 +56,17 @@ distance between バ and マ: 123.74445
 サンプルプログラムでは、デフォルトで同じ音素の類似度をオフセットとして使用し、実際の値から引いています。つまり、同じ音素の置換コストが0になるようにしています。これは、同じ音素の置換コストが0より大きい場合に、挿入コストが過大に見積もられ、編集距離の計算が直感に反することを防ぐためです。
 
 ### インストール
+- ソースからインストール (推奨)
+
 ```
 pip install .
+pip install jamorasep
+```
+
+- PyPIからインストール
+
+```
+pip install kanasim
 pip install jamorasep
 ```
 ### スクリプト実行
