@@ -305,7 +305,18 @@ If you wish to cite this library or similarity data, please include the followin
 }
 ```
 
-# References
+## References
 
 - A. Lee and T. Kawahara: Julius v4.5 (2019) https://doi.org/10.5281/zenodo.2530395
 - [音響モデルから音素間の距離を求める | 見返すかもしれないメモ](https://yaamaa-memo.hatenablog.com/entry/2017/12/17/062435)
+
+# For Developers
+
+- This project uses [uv](https://github.com/astral-sh/uv) for package management.
+- This project uses [taskipy](https://github.com/taskipy/taskipy) for command management.
+
+```
+uv run task test
+uv run task lint
+uv run task format
+```
