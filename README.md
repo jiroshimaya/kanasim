@@ -22,6 +22,11 @@ The column names in CSV format are as follows:
 
 By managing the distances between consonants and vowels separately, it is possible to adjust the weighting according to the application. The following example outputs the similarity of kana when consonants and vowels are added together in a 1:1 ratio.
 
+```sh
+git clone https://github.com/jiroshimaya/kanasim.git
+cd kanasim
+```
+
 ```Python
 import pandas as pd
 # Load the Kana-Phoneme-Similarity Correspondence Table
@@ -55,16 +60,16 @@ In the sample code, the similarity of the same phoneme is used as an offset by d
 
 - Install from source (Recommend)
 
-```
+```sh
+git clone https://github.com/jiroshimaya/kanasim.git
+cd kanasim
 pip install .
-pip install jamorasep
 ```
 
 - Install from PyPI
 
 ```
 pip install kanasim
-pip install jamorasep
 ```
 
 ### Using in terminal

@@ -25,6 +25,11 @@ csv形式で列名は以下です。
 子音と母音の距離を個別に管理することで、アプリケーションに応じた重み付けの調整が可能です。
 以下の例では、子音と母音を1:1で足し合わせたときのカナの類似度を出力しています。
 
+```sh
+git clone https://github.com/jiroshimaya/kanasim.git
+cd kanasim
+```
+
 ```Python
 import pandas as pd
 # カナ-音素-類似度対応表を読み込む
@@ -58,16 +63,16 @@ distance between バ and マ: 123.74445
 ### インストール
 - ソースからインストール (推奨)
 
-```
+```sh
+git clone https://github.com/jiroshimaya/kanasim.git
+cd kanasim
 pip install .
-pip install jamorasep
 ```
 
 - PyPIからインストール
 
 ```
 pip install kanasim
-pip install jamorasep
 ```
 ### スクリプト実行
 
