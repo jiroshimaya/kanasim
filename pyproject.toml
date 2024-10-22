@@ -1,6 +1,6 @@
 [project]
 name = "kanasim"
-version = "0.0.1"
+dynamic = ["version"]
 description = "Calculator of phonetic similarity (distance) between Japanese kana characters"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -20,8 +20,11 @@ classifiers = [
 urls = { "Homepage" = "https://github.com/jiroshimaya/kanasim" }
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
 
 [tool.uv]
 dev-dependencies = [
@@ -30,8 +33,12 @@ dev-dependencies = [
     "ipykernel>=6.29.5",
     "taskipy>=1.13.0",
 ]
+[tool.mypy]
+# Ignore errors for packages without stubs. This is because third-party libraries may lack type information.
+ignore_missing_imports = true
 
 [tool.taskipy.tasks]
 test = "pytest"
 lint = "uvx ruff check ."
 format = "uvx ruff format ."
+act-sample = "act -j publish -W .github/workflows/publish-to-testpypi.yaml -e tests/workflow/event.json"
