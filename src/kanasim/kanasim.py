@@ -1,6 +1,7 @@
 import csv
 import os
 from typing import Callable
+
 # from typing import Callable, List, Tuple, Dict, Optional, Iterable, Hashable, Any
 
 
@@ -169,7 +170,7 @@ class WeightedLevenshtein:
         self.delete_cost_func = delete_cost_func
         self.replace_cost_func = replace_cost_func
         self.preprocess_func = preprocess_func
-        self.memo: dict[tuple[str, str], float] = {}
+        self.memo: dict[str, float] = {}
 
     def calculate(self, word1: str, word2: str) -> float:
         if self.preprocess_func:
@@ -177,7 +178,9 @@ class WeightedLevenshtein:
             word2 = self.preprocess_func(word2)
         return self._calculate(word1, word2)
 
-    def calculate_batch(self, words1: list[str], words2: list[str]) -> list[float]:
+    def calculate_batch(
+        self, words1: list[str], words2: list[str]
+    ) -> list[list[float]]:
         if self.preprocess_func:
             words1 = [self.preprocess_func(word1) for word1 in words1]
             words2 = [self.preprocess_func(word2) for word2 in words2]
@@ -219,6 +222,25 @@ class WeightedLevenshtein:
         """
         return self._calculate_helper(word1, word2, len(word1), len(word2))
 
+    def _make_memo_key(self, word1: str | list[str], word2: str | list[str]) -> str:
+        if isinstance(word1, list):
+            word1_str = "-".join(word1)
+        else:
+            word1_str = word1
+        if isinstance(word2, list):
+            word2_str = "-".join(word2)
+        else:
+            word2_str = word2
+        return f"{word1_str}_{word2_str}"
+
+    def _set_memo(self, word1: str | list[str], word2: str | list[str], cost: float):
+        memo_key = self._make_memo_key(word1, word2)
+        self.memo[memo_key] = cost
+
+    def _get_memo(self, word1: str | list[str], word2: str | list[str]) -> float | None:
+        memo_key = self._make_memo_key(word1, word2)
+        return self.memo.get(memo_key)
+
     def _calculate_helper(self, word1: str, word2: str, m: int, n: int) -> float:
         """
         A helper function to recursively calculate the weighted Levenshtein distance between two lists of strings.
@@ -233,8 +255,9 @@ class WeightedLevenshtein:
             float: The calculated weighted Levenshtein distance.
         """
         # Check for memoized result
-        if (tuple(word1[:m]), tuple(word2[:n])) in self.memo:
-            return self.memo[(tuple(word1[:m]), tuple(word2[:n]))]
+        memo_value = self._get_memo(word1, word2)
+        if memo_value is not None:
+            return memo_value
 
         # Base case
         if m == 0:
@@ -245,7 +268,7 @@ class WeightedLevenshtein:
                     if self.insert_cost_func
                     else self.insert_cost
                 )
-            self.memo[(tuple(word1[:m]), tuple(word2[:n]))] = cost
+            self._set_memo(word1[:m], word2[:n], cost)
             return cost
         if n == 0:
             cost = 0.0
@@ -255,7 +278,7 @@ class WeightedLevenshtein:
                     if self.delete_cost_func
                     else self.delete_cost
                 )
-            self.memo[(tuple(word1[:m]), tuple(word2[:n]))] = cost
+            self._set_memo(word1[:m], word2[:n], cost)
             return cost
 
         # Calculate the cost of replace, delete, and insert
@@ -281,7 +304,7 @@ class WeightedLevenshtein:
         cost = min(replace, delete, insert)
 
         # Memoize the result
-        self.memo[(tuple(word1[:m]), tuple(word2[:n]))] = cost
+        self._set_memo(word1[:m], word2[:n], cost)
         return cost
 
 
