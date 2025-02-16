@@ -125,18 +125,12 @@ def create_kana_distance_list(
 
 class MemoManager:
     def __init__(self):
-        self.memo: dict[str, float] = {}
+        self.memo: dict[tuple[tuple[str, ...], tuple[str, ...]], float] = {}
 
-    def _make_key(self, word1: str | list[str], word2: str | list[str]) -> str:
-        if isinstance(word1, list):
-            word1_str = "-".join(word1)
-        else:
-            word1_str = word1
-        if isinstance(word2, list):
-            word2_str = "-".join(word2)
-        else:
-            word2_str = word2
-        return f"{word1_str}_{word2_str}"
+    def _make_key(
+        self, word1: str | list[str], word2: str | list[str]
+    ) -> tuple[tuple[str, ...], tuple[str, ...]]:
+        return tuple(word1), tuple(word2)
 
     def set(self, word1: str | list[str], word2: str | list[str], cost: float):
         memo_key = self._make_key(word1, word2)
@@ -262,7 +256,7 @@ class WeightedLevenshtein:
             float: The calculated weighted Levenshtein distance.
         """
         # Check for memoized result
-        memo_value = self.memo.get(word1, word2)
+        memo_value = self.memo.get(word1[:m], word2[:n])
         if memo_value is not None:
             return memo_value
 
@@ -429,7 +423,7 @@ class WeightedHamming:
             float: The calculated weighted Hamming distance.
         """
         # Check for memoized result
-        memo_value = self.memo.get(word1, word2)
+        memo_value = self.memo.get(word1[:length], word2[:length])
         if memo_value is not None:
             return memo_value
 
@@ -442,7 +436,7 @@ class WeightedHamming:
                     cost += self.replace_cost
 
         # Memoize the result
-        self.memo.set(word1, word2, cost)
+        self.memo.set(word1[:length], word2[:length], cost)
         return cost
 
 
