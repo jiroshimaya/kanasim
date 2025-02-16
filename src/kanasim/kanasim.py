@@ -423,7 +423,7 @@ class WeightedHamming:
             float: The calculated weighted Hamming distance.
         """
         # Check for memoized result
-        memo_value = self.memo.get(word1, word2)
+        memo_value = self.memo.get(word1[:length], word2[:length])
         if memo_value is not None:
             return memo_value
 
@@ -436,7 +436,7 @@ class WeightedHamming:
                     cost += self.replace_cost
 
         # Memoize the result
-        self.memo.set(word1, word2, cost)
+        self.memo.set(word1[:length], word2[:length], cost)
         return cost
 
 
