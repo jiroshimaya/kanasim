@@ -1,5 +1,7 @@
-from kanasim import extend_long_vowel_moras
-from kanasim import create_kana_distance_calculator
+import random
+import time
+
+from kanasim import create_kana_distance_calculator, extend_long_vowel_moras
 
 
 def test_extend_long_vowel_moras():
@@ -28,3 +30,14 @@ def test_create_kana_hamming_distance_calculator():
     ranking = calculator.get_topn(word, wordlist, n=10)
     top3_words = [w for w, _ in ranking[:3]]
     assert top3_words == ["カナダ", "カラダ", "カナタ"]
+
+
+def test_calculate_batch_speed():
+    calculator = create_kana_distance_calculator()
+    katakana = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンガギグゲゴザジズゼゾダジヅデドバビブベボパピプペポ"
+    wordlist1 = ["".join(random.choices(katakana, k=5)) for _ in range(10)]
+    wordlist2 = ["".join(random.choices(katakana, k=5)) for _ in range(10)]
+    start = time.time()
+    calculator.calculate_batch(wordlist1, wordlist2)
+    total_time = time.time() - start
+    assert total_time < 0.02
