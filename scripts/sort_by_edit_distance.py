@@ -2,6 +2,7 @@ import editdistance as ed
 from kanasim import extend_long_vowel_moras
 
 import jamorasep
+from collections.abc import Sequence
 
 
 def load_wordlist(path: str) -> list[str]:
@@ -16,9 +17,10 @@ def split_consonant_vowel(mora: str) -> tuple[str, str]:
 
 
 def convert_to_vowels_and_consonants(
-    moras: list[str],
-) -> tuple[tuple[str, str], tuple[str, str]]:
-    vowels, consonants = [], []
+    moras: Sequence[str],
+) -> tuple[list[str], list[str]]:
+    vowels: list[str] = []
+    consonants: list[str] = []
     for mora in moras:
         consonant, vowel = split_consonant_vowel(mora)
         consonants.append(consonant)
