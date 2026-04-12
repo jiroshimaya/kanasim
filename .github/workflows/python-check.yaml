@@ -19,9 +19,12 @@ jobs:
       with:
         enable-cache: true
 
-    - name: Run lint and mypy
+    - name: Run lint
       run: |
         uv run task lint
+
+    - name: Run ty
+      run: uv run task typecheck
 
     - name: Run format
       run: uv run task format --check

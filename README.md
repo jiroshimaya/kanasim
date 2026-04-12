@@ -332,5 +332,6 @@ If you wish to cite this library or similarity data, please include the followin
 ```
 uv run task test
 uv run task lint
+uv run task typecheck
 uv run task format
 ```
