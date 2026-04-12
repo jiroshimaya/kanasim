@@ -5,6 +5,7 @@ description = "Calculator of phonetic similarity (distance) between Japanese kan
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "editdistance>=0.8.1",
     "jamorasep>=0.0.1",
 ]
 authors = [
@@ -32,13 +33,11 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "ipykernel>=6.29.5",
     "taskipy>=1.13.0",
+    "ty>=0.0.29",
 ]
-[tool.mypy]
-# Ignore errors for packages without stubs. This is because third-party libraries may lack type information.
-ignore_missing_imports = true
-
 [tool.taskipy.tasks]
 test = "pytest"
 lint = "uvx ruff check ."
+typecheck = "ty check"
 format = "uvx ruff format ."
 act-sample = "act -j publish -W .github/workflows/publish-to-testpypi.yaml -e tests/workflow/event.json"

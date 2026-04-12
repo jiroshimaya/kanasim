@@ -338,5 +338,6 @@ vowel_ratio=0.0
 ```
 uv run task test
 uv run task lint
+uv run task typecheck
 uv run task format
 ```

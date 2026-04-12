@@ -2,6 +2,7 @@ from kanasim import extend_long_vowel_moras
 
 import jamorasep
 import logging
+from collections.abc import Sequence
 
 # Set up logging
 logging.basicConfig(
@@ -26,10 +27,11 @@ def split_consonant_vowel(mora: str) -> tuple[str, str]:
 
 
 def convert_to_vowels_and_consonants(
-    moras: list[str],
-) -> tuple[tuple[str, str], tuple[str, str]]:
+    moras: Sequence[str],
+) -> tuple[list[str], list[str]]:
     logging.debug(f"Converting moras to vowels and consonants: {moras}")
-    vowels, consonants = [], []
+    vowels: list[str] = []
+    consonants: list[str] = []
     for mora in moras:
         consonant, vowel = split_consonant_vowel(mora)
         consonants.append(consonant)
@@ -38,7 +40,7 @@ def convert_to_vowels_and_consonants(
     return consonants, vowels
 
 
-def hamming_distance(str1: str, str2: str) -> int:
+def hamming_distance(str1: Sequence[str], str2: Sequence[str]) -> float:
     logging.debug(f"Calculating Hamming distance between '{str1}' and '{str2}'")
     if len(str1) != len(str2):
         logging.debug("Strings have different lengths, returning infinity")
