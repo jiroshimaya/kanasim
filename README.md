@@ -82,8 +82,7 @@ python scripts/calculate_weighted_edit_distance.py カナダ バハマ
 python scripts/calculate_weighted_edit_distance.py カナダ バハマ -dt
 
 # Sort word list based on distance
-python scripts/sort_by_weighted_edit_distance.py シマウマ -w data/sample/pro
-nunciation.txt 
+python scripts/sort_by_weighted_edit_distance.py シマウマ -w data/sample/pronunciation.txt 
 ```
 ### Using in Python code
 
