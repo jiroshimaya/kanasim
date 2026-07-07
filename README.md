@@ -228,6 +228,25 @@ from kanasim import create_kana_distance_calculator
 calculator = create_kana_distance_calculator(phoneme_unit="mono")
 ```
 
+
+#### Feature-based consonant distance
+
+Instead of the acoustic-model distances, consonant distance can be derived
+from distinctive phonological features (voicing, place, manner, nasality,
+palatalization, ...), following the approach used in rap-rhyme analyses
+(e.g. Kawahara 2007). The distance is the fraction of mismatched features,
+so it is symmetric and normalized to [0, 1]. The feature matrix is in
+`src/kanasim/data/features/consonant_features.csv` and can be edited and
+regenerated with `scripts/create_feature_distance_csv.py`.
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(
+    phoneme_unit="mono", consonant_distance="features"
+)
+```
+
 ## Other Phonetic Similarity Related Files
 In addition to the [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonome_distance.csv), there are three other files. These files are integrated into the Kana-Phoneme-Similarity Correspondence Table, so you usually do not need to refer to them directly.
 

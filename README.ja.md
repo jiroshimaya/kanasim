@@ -223,6 +223,19 @@ from kanasim import create_kana_distance_calculator
 calculator = create_kana_distance_calculator(phoneme_unit="mono")
 ```
 
+
+#### 弁別素性ベースの子音距離
+
+音響モデル由来の距離の代わりに、弁別素性（有声性・調音位置・調音様式・鼻音性・口蓋化など）の一致度から子音距離を求められます。ラップの押韻分析（川原 2007 など）で用いられる考え方に準拠し、距離は不一致素性の割合（対称・[0,1]正規化済み）です。素性行列は`src/kanasim/data/features/consonant_features.csv`にあり、編集して`scripts/create_feature_distance_csv.py`で再生成できます。
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(
+    phoneme_unit="mono", consonant_distance="features"
+)
+```
+
 ## その他の音韻類似度関連ファイル
 [カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonome_distance.csv)以外に、3つのファイルがあります。これらのファイルは、カナ-音素-類似度対応表に統合されているため、通常はこれらを直接参照する必要はありません。
 

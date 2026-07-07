@@ -122,6 +122,22 @@ def test_phoneme_unit_mono_basic():
     assert rhyme.calculate("カ", "コ") > rhyme.calculate("カ", "サ")
 
 
+def test_consonant_distance_features():
+    calculator = create_kana_distance_calculator(
+        phoneme_unit="mono", consonant_distance="features", vowel_ratio=0
+    )
+    # voicing pair < place mismatch < almost everything differs
+    voicing = calculator.calculate("カ", "ガ")
+    place = calculator.calculate("カ", "サ")
+    unrelated = calculator.calculate("マ", "サ")
+    assert 0 < voicing < place < unrelated
+
+
+def test_consonant_distance_features_requires_mono():
+    with pytest.raises(ValueError, match="features"):
+        create_kana_distance_calculator(consonant_distance="features")
+
+
 def _reference_levenshtein(word1, word2, insert_cost, delete_cost, replace_cost):
     """Naive recursive implementation used as a test oracle."""
     if not word1:
