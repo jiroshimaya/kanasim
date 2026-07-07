@@ -469,6 +469,7 @@ def create_kana_distance_calculator(
     normalize: bool = False,
     phoneme_unit: Literal["biphone", "mono"] = "biphone",
     consonant_distance: Literal["acoustic", "features"] = "acoustic",
+    symmetric: bool = False,
 ) -> WeightedLevenshtein | WeightedHamming:
     default_consonants_csv, default_vowels_csv = _DEFAULT_DISTANCE_CSVS[phoneme_unit]
     if consonant_distance == "features":
@@ -501,6 +502,15 @@ def create_kana_distance_calculator(
         kana2 = row["kana2"]
         distance = row["distance"]
         distance_dict[(kana1, kana2)] = distance
+
+    if symmetric:
+        # The likelihood-based tables are asymmetric (d(a,b) != d(b,a)).
+        # Averaging with the transpose makes the resulting kana distance
+        # direction-independent, including insert vs. delete costs.
+        distance_dict = {
+            (kana1, kana2): (distance + distance_dict[(kana2, kana1)]) / 2
+            for (kana1, kana2), distance in distance_dict.items()
+        }
 
     def lookup_distance(kana1: str, kana2: str) -> float:
         try:
