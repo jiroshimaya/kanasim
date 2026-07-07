@@ -34,6 +34,7 @@ dev = [
     "ipykernel>=6.29.5",
     "taskipy>=1.13.0",
     "ty>=0.0.29",
+    "numpy>=1.26",
 ]
 [tool.taskipy.tasks]
 test = "pytest"

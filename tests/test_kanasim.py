@@ -138,6 +138,25 @@ def test_consonant_distance_features_requires_mono():
         create_kana_distance_calculator(consonant_distance="features")
 
 
+def test_mono_hmm_tables_usable():
+    import os
+
+    import kanasim
+
+    data_dir = os.path.join(os.path.dirname(kanasim.__file__), "data/monophone")
+    calculator = create_kana_distance_calculator(
+        phoneme_unit="mono",
+        vowel_ratio=0,
+        distance_consonants_csv=os.path.join(
+            data_dir, "distance_consonants_mono_hmm.csv"
+        ),
+        distance_vowels_csv=os.path.join(data_dir, "distance_vowels_mono_hmm.csv"),
+    )
+    assert calculator.calculate("カナダ", "カナダ") == 0
+    # consonants only: s/sh are acoustically close, s/m far apart
+    assert calculator.calculate("サ", "シャ") < calculator.calculate("サ", "マ")
+
+
 def _reference_levenshtein(word1, word2, insert_cost, delete_cost, replace_cost):
     """Naive recursive implementation used as a test oracle."""
     if not word1:
