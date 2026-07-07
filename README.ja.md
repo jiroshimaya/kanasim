@@ -236,6 +236,17 @@ calculator = create_kana_distance_calculator(
 )
 ```
 
+
+#### 距離の対称化
+
+尤度ベースの距離表は非対称です（`calculate(a, b) != calculate(b, a)`。音響モデルからの導出方法に由来する意図的な性質です）。`symmetric=True`を指定すると双方向の平均を取り、向きに依存しない距離になります。歌唱ASRデータでの検索ベンチマークでは、非対称のデフォルトよりわずかに良い精度でした。
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(symmetric=True)
+```
+
 ## その他の音韻類似度関連ファイル
 [カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonome_distance.csv)以外に、3つのファイルがあります。これらのファイルは、カナ-音素-類似度対応表に統合されているため、通常はこれらを直接参照する必要はありません。
 

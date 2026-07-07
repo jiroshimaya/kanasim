@@ -247,6 +247,22 @@ calculator = create_kana_distance_calculator(
 )
 ```
 
+
+#### Symmetric distance
+
+The likelihood-based distance tables are asymmetric (`calculate(a, b) !=
+calculate(b, a)`); this is intentional, reflecting how the tables were
+derived from the acoustic model. Pass `symmetric=True` to average the two
+directions so the distance becomes direction-independent. In our retrieval
+benchmark on sung-ASR data this performed slightly better than the
+asymmetric default.
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(symmetric=True)
+```
+
 ## Other Phonetic Similarity Related Files
 In addition to the [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonome_distance.csv), there are three other files. These files are integrated into the Kana-Phoneme-Similarity Correspondence Table, so you usually do not need to refer to them directly.
 

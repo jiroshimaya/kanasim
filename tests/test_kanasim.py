@@ -157,6 +157,19 @@ def test_mono_hmm_tables_usable():
     assert calculator.calculate("サ", "シャ") < calculator.calculate("サ", "マ")
 
 
+def test_symmetric_option():
+    asym = create_kana_distance_calculator()
+    assert asym.calculate("カナダ", "バハマ") != asym.calculate("バハマ", "カナダ")
+    sym = create_kana_distance_calculator(symmetric=True)
+    pairs = [("カナダ", "バハマ"), ("ウェンザ", "ウェザー"), ("カ", "キー")]
+    for word1, word2 in pairs:
+        assert sym.calculate(word1, word2) == pytest.approx(sym.calculate(word2, word1))
+    # the symmetric distance is the average of the two directions at the
+    # single-mora level
+    expected = (asym.calculate("カ", "サ") + asym.calculate("サ", "カ")) / 2
+    assert sym.calculate("カ", "サ") == pytest.approx(expected)
+
+
 def _reference_levenshtein(word1, word2, insert_cost, delete_cost, replace_cost):
     """Naive recursive implementation used as a test oracle."""
     if not word1:
