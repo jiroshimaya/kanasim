@@ -213,6 +213,21 @@ print(calculator.calculate("カ", "コ"))  # vowel mismatch: 0.61
 print(calculator.calculate("カ", "サ"))  # consonant mismatch: 0.15
 ```
 
+
+#### Monophone distance tables
+
+The default distance tables are biphone-based ("k+a" vs "k+i"), so consonant
+distances are affected by the neighboring vowel; occasionally the same
+consonant in different vowel contexts is farther apart than two different
+consonants. `phoneme_unit="mono"` switches to monophone tables derived by
+averaging the biphone distances (see `scripts/create_monophone_distance_csv.py`):
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(phoneme_unit="mono")
+```
+
 ## Other Phonetic Similarity Related Files
 In addition to the [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonome_distance.csv), there are three other files. These files are integrated into the Kana-Phoneme-Similarity Correspondence Table, so you usually do not need to refer to them directly.
 

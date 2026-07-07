@@ -96,6 +96,32 @@ def test_normalize_keeps_ranking_of_default_weights():
     assert ranking[0][0] in ("カラダ", "カナタ")
 
 
+def test_phoneme_unit_mono_removes_vowel_contamination():
+    # In the biphone tables the consonant labels carry the following vowel
+    # ("k+a" vs "k+i"), so with consonants only (vowel_ratio=0) the same
+    # consonant カ/キ ends up farther apart than the different consonants カ/タ.
+    biphone = create_kana_distance_calculator(vowel_ratio=0)
+    assert biphone.calculate("カ", "キ") > biphone.calculate("カ", "タ")
+    # With monophone tables the contamination is gone.
+    mono = create_kana_distance_calculator(vowel_ratio=0, phoneme_unit="mono")
+    assert mono.calculate("カ", "キ") == 0
+    assert mono.calculate("カ", "タ") > 0
+
+
+def test_phoneme_unit_mono_basic():
+    calculator = create_kana_distance_calculator(phoneme_unit="mono")
+    assert calculator.calculate("カナダ", "カナダ") == 0
+    word = "カナダ"
+    wordlist = ["カナダ", "バハマ", "タバタ", "サワラ", "カナタ", "カラダ", "カドマ"]
+    ranking = calculator.get_topn(word, wordlist, n=10)
+    assert ranking[0][0] == "カナダ"
+    # combined with the rhyme-oriented options
+    rhyme = create_kana_distance_calculator(
+        phoneme_unit="mono", vowel_binary=True, normalize=True
+    )
+    assert rhyme.calculate("カ", "コ") > rhyme.calculate("カ", "サ")
+
+
 def _reference_levenshtein(word1, word2, insert_cost, delete_cost, replace_cost):
     """Naive recursive implementation used as a test oracle."""
     if not word1:
