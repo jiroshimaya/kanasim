@@ -197,6 +197,21 @@ vowel_ratio=0.8
 ```
 
 
+
+#### 正規化と押韻向け設定
+
+デフォルトでは子音・母音の距離は音響モデル由来の生のスケールのままなので、バイナリオプション（`consonant_binary` / `vowel_binary`）と混ぜると0/1側の影響がほぼ消えてしまいます。`normalize=True`を指定すると、合成前に両方の距離表を[0, 1]に正規化します。
+
+母音の一致が子音の一致より重要な押韻用途では、`vowel_binary=True`と`normalize=True`の併用を推奨します。
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(vowel_binary=True, normalize=True)
+print(calculator.calculate("カ", "コ"))  # 母音違い: 0.61
+print(calculator.calculate("カ", "サ"))  # 子音違い: 0.15
+```
+
 ## その他の音韻類似度関連ファイル
 [カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonome_distance.csv)以外に、3つのファイルがあります。これらのファイルは、カナ-音素-類似度対応表に統合されているため、通常はこれらを直接参照する必要はありません。
 
