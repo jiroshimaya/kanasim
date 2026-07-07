@@ -341,3 +341,10 @@ uv run task lint
 uv run task typecheck
 uv run task format
 ```
+
+## リリースフロー
+
+- PRが`main`にマージされ、`src/`または`pyproject.toml`に変更があると、`Release`ワークフローがパッチバージョンを自動でタグ付けし、PyPIに公開します。
+- マイナー/メジャーリリースは`Release`ワークフローを`workflow_dispatch`で手動実行し、incrementを指定します。
+- 公開をスキップしたい場合は、マージコミットメッセージに`[skip release]`を含めます。
+- PRは`PythonCheck`（lint / typecheck / format / test / build）の通過が必須で、auto-mergeを有効にするとCI通過後に自動マージされます: `gh pr merge --auto --squash <PR>`
