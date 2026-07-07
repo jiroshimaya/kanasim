@@ -334,3 +334,10 @@ uv run task lint
 uv run task typecheck
 uv run task format
 ```
+
+## Release flow
+
+- When a PR is merged into `main` with changes to `src/` or `pyproject.toml`, the `Release` workflow automatically tags a patch version and publishes it to PyPI.
+- For a minor/major release, run the `Release` workflow manually via `workflow_dispatch` with the desired increment.
+- Add `[skip release]` to the merge commit message to skip publishing.
+- PRs must pass `PythonCheck` (lint / typecheck / format / test / build). With auto-merge enabled, a PR merges automatically once CI passes: `gh pr merge --auto --squash <PR>`
