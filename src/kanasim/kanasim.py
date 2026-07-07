@@ -468,8 +468,18 @@ def create_kana_distance_calculator(
     vowel_binary: bool = False,
     normalize: bool = False,
     phoneme_unit: Literal["biphone", "mono"] = "biphone",
+    consonant_distance: Literal["acoustic", "features"] = "acoustic",
 ) -> WeightedLevenshtein | WeightedHamming:
     default_consonants_csv, default_vowels_csv = _DEFAULT_DISTANCE_CSVS[phoneme_unit]
+    if consonant_distance == "features":
+        # The distinctive-feature table is keyed by monophone labels.
+        if phoneme_unit != "mono":
+            raise ValueError(
+                'consonant_distance="features" requires phoneme_unit="mono"'
+            )
+        default_consonants_csv = os.path.join(
+            _DATA_DIR, "features/distance_consonants_mono_features.csv"
+        )
     distance_list = create_kana_distance_list(
         kana2phonome_csv=kana2phonome_csv,
         distance_consonants_csv=distance_consonants_csv or default_consonants_csv,
