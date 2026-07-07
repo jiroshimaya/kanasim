@@ -70,6 +70,32 @@ def test_create_kana_hamming_distance_calculator():
     assert top3_words == ["カナダ", "カラダ", "カナタ"]
 
 
+def test_normalize_bounds_distances():
+    calculator = create_kana_distance_calculator(normalize=True)
+    # with all penalties at 1.0, a normalized single-mora distance is at most 1
+    assert 0 < calculator.calculate("カ", "サ") <= 1
+    assert calculator.calculate("カ", "カ") == 0
+
+
+def test_normalize_with_vowel_binary_prioritizes_vowel_match():
+    # For rhyming, a vowel mismatch should outweigh a consonant mismatch.
+    # Without normalize, vowel_binary=True has the opposite effect because the
+    # binary vowel distance (0/1) is negligible next to raw consonant
+    # distances.
+    calculator = create_kana_distance_calculator(vowel_binary=True, normalize=True)
+    vowel_mismatch = calculator.calculate("カ", "コ")
+    consonant_mismatch = calculator.calculate("カ", "サ")
+    assert vowel_mismatch > consonant_mismatch
+
+
+def test_normalize_keeps_ranking_of_default_weights():
+    calculator = create_kana_distance_calculator(normalize=True)
+    word = "カナダ"
+    wordlist = ["バハマ", "タバタ", "サワラ", "カナタ", "カラダ", "カドマ"]
+    ranking = calculator.get_topn(word, wordlist, n=10)
+    assert ranking[0][0] in ("カラダ", "カナタ")
+
+
 def _reference_levenshtein(word1, word2, insert_cost, delete_cost, replace_cost):
     """Naive recursive implementation used as a test oracle."""
     if not word1:

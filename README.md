@@ -194,6 +194,25 @@ vowel_ratio=0.8
 ```
 
 
+
+#### Normalization and rhyme-oriented settings
+
+By default, consonant and vowel distances keep the raw scale of the underlying
+acoustic model, so mixing them with the binary options (`consonant_binary` /
+`vowel_binary`) makes the binary side (0/1) negligible. Set `normalize=True`
+to rescale both tables to [0, 1] before they are combined.
+
+For rhyming applications, where a vowel match matters much more than a
+consonant match, combine `vowel_binary=True` with `normalize=True`:
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(vowel_binary=True, normalize=True)
+print(calculator.calculate("カ", "コ"))  # vowel mismatch: 0.61
+print(calculator.calculate("カ", "サ"))  # consonant mismatch: 0.15
+```
+
 ## Other Phonetic Similarity Related Files
 In addition to the [Kana-Phoneme-Similarity Correspondence Table](src/kanasim/biphone/kana_to_phonome_distance.csv), there are three other files. These files are integrated into the Kana-Phoneme-Similarity Correspondence Table, so you usually do not need to refer to them directly.
 

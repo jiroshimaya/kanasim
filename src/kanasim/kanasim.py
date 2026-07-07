@@ -47,6 +47,7 @@ def create_kana_distance_list(
     same_phonome_offset: bool,
     consonant_binary: bool,
     vowel_binary: bool,
+    normalize: bool = False,
 ) -> list[dict]:
     if not (0 <= vowel_ratio <= 1):
         raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
@@ -81,6 +82,22 @@ def create_kana_distance_list(
     else:
         distance_consonants = distance_consonants_raw
         distance_vowels = distance_vowels_raw
+
+    if normalize:
+        # Scale consonant and vowel distances to [0, 1] each, so that the two
+        # are combined on a comparable scale. Without this, mixing a binary
+        # table (0/1) with raw acoustic distances (tens) makes the binary side
+        # nearly irrelevant regardless of vowel_ratio.
+        max_consonant = max(distance_consonants.values())
+        if max_consonant > 0:
+            distance_consonants = {
+                key: value / max_consonant for key, value in distance_consonants.items()
+            }
+        max_vowel = max(distance_vowels.values())
+        if max_vowel > 0:
+            distance_vowels = {
+                key: value / max_vowel for key, value in distance_vowels.items()
+            }
 
     results = []
     for row1 in kana2phonome:
@@ -438,6 +455,7 @@ def create_kana_distance_calculator(
     same_phonome_offset: bool = True,
     consonant_binary: bool = False,
     vowel_binary: bool = False,
+    normalize: bool = False,
 ) -> WeightedLevenshtein | WeightedHamming:
     distance_list = create_kana_distance_list(
         kana2phonome_csv=kana2phonome_csv,
@@ -451,6 +469,7 @@ def create_kana_distance_calculator(
         same_phonome_offset=same_phonome_offset,
         consonant_binary=consonant_binary,
         vowel_binary=vowel_binary,
+        normalize=normalize,
     )
     distance_dict = {}
     for row in distance_list:
