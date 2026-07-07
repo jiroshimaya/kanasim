@@ -229,83 +229,57 @@ class WeightedLevenshtein:
 
     def _calculate(self, word1: list[str], word2: list[str]) -> float:
         """
-        Calculates the weighted Levenshtein distance between two lists of strings.
+        Calculates the weighted Levenshtein distance between two lists of strings
+        with an iterative dynamic programming algorithm.
 
         Args:
             word1 (str): The first word.
             word2 (str): The second word.
-
-        Returns:
-            float: The calculated weighted Levenshtein distance.
-        """
-        return self._calculate_helper(word1, word2, len(word1), len(word2))
-
-    def _calculate_helper(
-        self, word1: list[str], word2: list[str], m: int, n: int
-    ) -> float:
-        """
-        A helper function to recursively calculate the weighted Levenshtein distance between two lists of strings.
-
-        Args:
-            word1 (str): The first word.
-            word2 (str): The second word.
-            m (int): The length of the first word.
-            n (int): The length of the second word.
 
         Returns:
             float: The calculated weighted Levenshtein distance.
         """
         # Check for memoized result
-        memo_value = self.memo.get(word1[:m], word2[:n])
+        memo_value = self.memo.get(word1, word2)
         if memo_value is not None:
             return memo_value
 
-        # Base case
-        if m == 0:
-            cost = 0.0
-            for i in range(n):
-                cost += (
-                    self.insert_cost_func(word2[i])
-                    if self.insert_cost_func
-                    else self.insert_cost
-                )
-            self.memo.set(word1[:m], word2[:n], cost)
-            return cost
-        if n == 0:
-            cost = 0.0
-            for i in range(m):
-                cost += (
-                    self.delete_cost_func(word1[i])
-                    if self.delete_cost_func
-                    else self.delete_cost
-                )
-            self.memo.set(word1[:m], word2[:n], cost)
-            return cost
+        m, n = len(word1), len(word2)
+        insert_costs = [
+            self.insert_cost_func(c) if self.insert_cost_func else self.insert_cost
+            for c in word2
+        ]
+        delete_costs = [
+            self.delete_cost_func(c) if self.delete_cost_func else self.delete_cost
+            for c in word1
+        ]
 
-        # Calculate the cost of replace, delete, and insert
-        replace_cost = (
-            self.replace_cost_func(word1[m - 1], word2[n - 1])
-            if self.replace_cost_func
-            else self.replace_cost
-        )
-        delete_cost = (
-            self.delete_cost_func(word1[m - 1])
-            if self.delete_cost_func
-            else self.delete_cost
-        )
-        insert_cost = (
-            self.insert_cost_func(word2[n - 1])
-            if self.insert_cost_func
-            else self.insert_cost
-        )
+        # prev[j] holds the distance between word1[:i-1] and word2[:j]
+        prev = [0.0] * (n + 1)
+        for j in range(1, n + 1):
+            prev[j] = prev[j - 1] + insert_costs[j - 1]
 
-        replace = replace_cost + self._calculate_helper(word1, word2, m - 1, n - 1)
-        delete = delete_cost + self._calculate_helper(word1, word2, m - 1, n)
-        insert = insert_cost + self._calculate_helper(word1, word2, m, n - 1)
-        cost = min(replace, delete, insert)
+        replace_cost_func = self.replace_cost_func
+        for i in range(1, m + 1):
+            c1 = word1[i - 1]
+            delete_cost = delete_costs[i - 1]
+            curr = [prev[0] + delete_cost] + [0.0] * n
+            for j in range(1, n + 1):
+                replace_cost = (
+                    replace_cost_func(c1, word2[j - 1])
+                    if replace_cost_func
+                    else self.replace_cost
+                )
+                curr[j] = min(
+                    prev[j - 1] + replace_cost,
+                    prev[j] + delete_cost,
+                    curr[j - 1] + insert_costs[j - 1],
+                )
+            prev = curr
+        cost = prev[n]
 
         # Memoize the result
-        self.memo.set(word1[:m], word2[:n], cost)
+        self.memo.set(word1, word2, cost)
         return cost
 
 
