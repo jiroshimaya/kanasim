@@ -313,10 +313,13 @@ class WeightedLevenshtein:
 
 
 def extend_long_vowel_moras(text: str) -> list[str]:
+    # Whitespace (e.g. word separators in song lyrics) carries no phonetic
+    # information, and moras containing it are not in the distance table.
+    text = "".join(text.split())
     parsed_moras = jamorasep.parse(text, output_format="katakana")
-    extended_moras = []
-    for index, mora in enumerate(parsed_moras):
-        if mora == "ー" and index > 0:
+    extended_moras: list[str] = []
+    for mora in parsed_moras:
+        if mora == "ー" and extended_moras:
             extended_moras[-1] += mora
         else:
             extended_moras.append(mora)
@@ -482,14 +485,23 @@ def create_kana_distance_calculator(
         distance = row["distance"]
         distance_dict[(kana1, kana2)] = distance
 
+    def lookup_distance(kana1: str, kana2: str) -> float:
+        try:
+            return distance_dict[(kana1, kana2)]
+        except KeyError:
+            raise ValueError(
+                f"Mora not found in the kana distance table: {(kana1, kana2)!r}. "
+                "Input must consist of katakana convertible to phonemes."
+            ) from None
+
     def insert_cost_func(kana: str) -> float:
-        return distance_dict[("sp", kana)]
+        return lookup_distance("sp", kana)
 
     def delete_cost_func(kana: str) -> float:
-        return distance_dict[(kana, "sp")]
+        return lookup_distance(kana, "sp")
 
     def replace_cost_func(kana1: str, kana2: str) -> float:
-        return distance_dict[(kana1, kana2)]
+        return lookup_distance(kana1, kana2)
 
     if distance_type == "levenshtein":
         return WeightedLevenshtein(
