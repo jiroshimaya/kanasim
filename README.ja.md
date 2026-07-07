@@ -212,6 +212,17 @@ print(calculator.calculate("カ", "コ"))  # 母音違い: 0.61
 print(calculator.calculate("カ", "サ"))  # 子音違い: 0.15
 ```
 
+
+#### モノフォン距離表
+
+デフォルトの距離表はバイフォン単位（"k+a" vs "k+i"）のため、子音距離に隣接母音の影響が混入し、同じ子音同士（カ・キ）が別の子音（カ・タ）より遠くなることがあります。`phoneme_unit="mono"`を指定すると、バイフォン距離を平均して導出したモノフォン距離表（`scripts/create_monophone_distance_csv.py`で生成）に切り替わります。
+
+```Python
+from kanasim import create_kana_distance_calculator
+
+calculator = create_kana_distance_calculator(phoneme_unit="mono")
+```
+
 ## その他の音韻類似度関連ファイル
 [カナ-音素-類似度対応表](src/kanasim/biphone/kana_to_phonome_distance.csv)以外に、3つのファイルがあります。これらのファイルは、カナ-音素-類似度対応表に統合されているため、通常はこれらを直接参照する必要はありません。
 

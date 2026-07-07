@@ -48,9 +48,12 @@ def create_kana_distance_list(
     consonant_binary: bool,
     vowel_binary: bool,
     normalize: bool = False,
+    phoneme_unit: Literal["biphone", "mono"] = "biphone",
 ) -> list[dict]:
     if not (0 <= vowel_ratio <= 1):
         raise ValueError("vowel_ratio must be between 0 and 1 inclusive")
+    consonant_column = "consonant" if phoneme_unit == "biphone" else "consonant_mono"
+    vowel_column = "vowel" if phoneme_unit == "biphone" else "vowel_mono"
     kana2phonome = load_csv(kana2phonome_csv)
     distance_consonants_raw = load_phonome_distance_csv(distance_consonants_csv)
     distance_vowels_raw = load_phonome_distance_csv(distance_vowels_csv)
@@ -104,10 +107,10 @@ def create_kana_distance_list(
         for row2 in kana2phonome:
             kana1 = row1["kana"]
             kana2 = row2["kana"]
-            consonant1 = row1["consonant"]
-            consonant2 = row2["consonant"]
-            vowel1 = row1["vowel"]
-            vowel2 = row2["vowel"]
+            consonant1 = row1[consonant_column]
+            consonant2 = row2[consonant_column]
+            vowel1 = row1[vowel_column]
+            vowel2 = row2[vowel_column]
 
             distance_consonant = distance_consonants[(consonant1, consonant2)]
             distance_vowel = distance_vowels[(vowel1, vowel2)]
@@ -434,17 +437,25 @@ class WeightedHamming:
         return cost
 
 
+_DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+
+_DEFAULT_DISTANCE_CSVS: dict[str, tuple[str, str]] = {
+    "biphone": (
+        os.path.join(_DATA_DIR, "biphone/distance_consonants_bi.csv"),
+        os.path.join(_DATA_DIR, "biphone/distance_vowels_bi.csv"),
+    ),
+    "mono": (
+        os.path.join(_DATA_DIR, "monophone/distance_consonants_mono_avg.csv"),
+        os.path.join(_DATA_DIR, "monophone/distance_vowels_mono_avg.csv"),
+    ),
+}
+
+
 def create_kana_distance_calculator(
     *,
-    kana2phonome_csv: str = os.path.join(
-        os.path.dirname(__file__), "data/biphone/kana2phonome_bi.csv"
-    ),
-    distance_consonants_csv: str = os.path.join(
-        os.path.dirname(__file__), "data/biphone/distance_consonants_bi.csv"
-    ),
-    distance_vowels_csv: str = os.path.join(
-        os.path.dirname(__file__), "data/biphone/distance_vowels_bi.csv"
-    ),
+    kana2phonome_csv: str = os.path.join(_DATA_DIR, "biphone/kana2phonome_bi.csv"),
+    distance_consonants_csv: str | None = None,
+    distance_vowels_csv: str | None = None,
     insert_penalty: float = 1.0,
     delete_penalty: float = 1.0,
     replace_penalty: float = 1.0,
@@ -456,11 +467,13 @@ def create_kana_distance_calculator(
     consonant_binary: bool = False,
     vowel_binary: bool = False,
     normalize: bool = False,
+    phoneme_unit: Literal["biphone", "mono"] = "biphone",
 ) -> WeightedLevenshtein | WeightedHamming:
+    default_consonants_csv, default_vowels_csv = _DEFAULT_DISTANCE_CSVS[phoneme_unit]
     distance_list = create_kana_distance_list(
         kana2phonome_csv=kana2phonome_csv,
-        distance_consonants_csv=distance_consonants_csv,
-        distance_vowels_csv=distance_vowels_csv,
+        distance_consonants_csv=distance_consonants_csv or default_consonants_csv,
+        distance_vowels_csv=distance_vowels_csv or default_vowels_csv,
         insert_penalty=insert_penalty,
         delete_penalty=delete_penalty,
         replace_penalty=replace_penalty,
@@ -470,6 +483,7 @@ def create_kana_distance_calculator(
         consonant_binary=consonant_binary,
         vowel_binary=vowel_binary,
         normalize=normalize,
+        phoneme_unit=phoneme_unit,
     )
     distance_dict = {}
     for row in distance_list:
