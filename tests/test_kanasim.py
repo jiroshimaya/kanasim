@@ -3,7 +3,11 @@ import time
 
 import pytest
 
-from kanasim import create_kana_distance_calculator, extend_long_vowel_moras
+from kanasim import (
+    WeightedLevenshtein,
+    create_kana_distance_calculator,
+    extend_long_vowel_moras,
+)
 
 
 def test_extend_long_vowel_moras():
@@ -64,6 +68,60 @@ def test_create_kana_hamming_distance_calculator():
     ranking = calculator.get_topn(word, wordlist, n=10)
     top3_words = [w for w, _ in ranking[:3]]
     assert top3_words == ["カナダ", "カラダ", "カナタ"]
+
+
+def _reference_levenshtein(word1, word2, insert_cost, delete_cost, replace_cost):
+    """Naive recursive implementation used as a test oracle."""
+    if not word1:
+        return sum(insert_cost(c) for c in word2)
+    if not word2:
+        return sum(delete_cost(c) for c in word1)
+    return min(
+        replace_cost(word1[-1], word2[-1])
+        + _reference_levenshtein(
+            word1[:-1], word2[:-1], insert_cost, delete_cost, replace_cost
+        ),
+        delete_cost(word1[-1])
+        + _reference_levenshtein(
+            word1[:-1], word2, insert_cost, delete_cost, replace_cost
+        ),
+        insert_cost(word2[-1])
+        + _reference_levenshtein(
+            word1, word2[:-1], insert_cost, delete_cost, replace_cost
+        ),
+    )
+
+
+def test_calculate_matches_reference_implementation():
+    calculator = create_kana_distance_calculator()
+    assert isinstance(calculator, WeightedLevenshtein)
+    assert calculator.insert_cost_func is not None
+    assert calculator.delete_cost_func is not None
+    assert calculator.replace_cost_func is not None
+    rng = random.Random(0)
+    katakana = (
+        "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホヤユヨランー"
+    )
+    for _ in range(30):
+        # a word starting with "ー" has no preceding mora to extend and is
+        # not in the distance table, so it is not a valid input
+        word1 = "".join(rng.choices(katakana, k=rng.randint(0, 5))).lstrip("ー")
+        word2 = "".join(rng.choices(katakana, k=rng.randint(0, 5))).lstrip("ー")
+        expected = _reference_levenshtein(
+            extend_long_vowel_moras(word1),
+            extend_long_vowel_moras(word2),
+            calculator.insert_cost_func,
+            calculator.delete_cost_func,
+            calculator.replace_cost_func,
+        )
+        assert calculator.calculate(word1, word2) == pytest.approx(expected)
+
+
+def test_calculate_long_input():
+    # The previous recursive implementation hit Python's recursion limit
+    # around 1000 moras in total.
+    calculator = create_kana_distance_calculator()
+    assert calculator.calculate("カ" * 600, "サ" * 600) > 0
 
 
 def test_calculate_batch_speed():
